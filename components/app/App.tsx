@@ -10,9 +10,9 @@ export default function App() {
     return (
         <NavigationContainer>
             <Drawer.Navigator initialRouteName="Home">
-                <Drawer.Screen name="Home" component={Home} />
-                <Drawer.Screen name="MyTeam" component={MyTeam} />
-                <Drawer.Screen name="Formations" component={Formation} />
+                <Drawer.Screen name="Home" component={Home} options={{ title: 'Home' }}/>
+                <Drawer.Screen name="MyTeam" component={MyTeam} options={{ title: 'My Team' }}/>
+                <Drawer.Screen name="Formations" component={Formation} options={{ title: 'Formations' }}/>
 
             </Drawer.Navigator>
         </NavigationContainer>

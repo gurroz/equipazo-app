@@ -1,202 +1,234 @@
-import {Dimensions, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import React, {Component, Fragment} from "react";
-import ImagePicker from 'react-native-image-picker';
+import {
+    Button,
+    Dimensions,
+    FlatList,
+    Image,
+    Modal,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View
+} from "react-native";
+import React, {Component} from "react";
 import {Colors} from "react-native/Libraries/NewAppScreen";
-
-interface IProps {
-}
+import {MyTeamProps} from "../../app/Router";
+import ImagePickerComponent from "../../common/ImagePickerComponent";
+import {apiGetTeam} from "./MyTeamApi";
+import AlertComponent from "../../common/AlertComponent";
 
 type MyClubState = {
-    fileData: string,
-    fileUri: string
+    imgFile: any
+    , imgSrc: string
+    , name: string
+    , id: number
+    , coaches: any
+    , players: any
+    , modalImage: any
+    , modalName: string
+    , modalVisible: boolean
+    , modalType : string
 }
 
-export class MyTeam extends Component<IProps, MyClubState> {
-
-    constructor(props: IProps) {
+type Member = {
+    name: string
+    , image: string
+}
+export class MyTeam extends Component<MyTeamProps, MyClubState> {
+    constructor(props: MyTeamProps) {
         super(props);
 
         this.state = {
-            fileData: '',
-            fileUri: ''
-        };
+            id: props.route.params.teamId
+            , imgFile: null
+            , imgSrc: ''
+            , name: ''
+            , coaches: []
+            , players: []
+            , modalImage: null
+            , modalName: ''
+            , modalVisible: false
+            , modalType: ''
+    };
     }
 
-    chooseImage = () => {
-        let options = {
-            title: 'Select Image',
-            // customButtons: [
-            //     { name: 'customOptionKey', title: 'Choose Photo from Custom Option' },
-            // ],
-            storageOptions: {
-                skipBackup: true,
-                path: 'images',
+    componentDidMount = () => {
+        this.getTeam();
+    }
+
+    getTeam = () => {
+        console.log("Calling getTeam");
+        apiGetTeam(this.state.id, (response: any) => {
+                console.log("Response getTeam is", response);
+                this.setState({imgSrc:response.emblemURL, name: response.name})
             },
-        };
-        ImagePicker.showImagePicker(options, (response) => {
-            console.log('Response = ', response);
+            (error: any) => {
+                AlertComponent({title: "Error", message:"Error getting Team"});
+                if(error.response)
+                    console.log(error.response.data);
 
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-            } else {
-                const source = { uri: response.uri };
+                if(error.request)
+                    console.log(error.request);
 
-                // You can also display the image using data:
-                // const source = { uri: 'data:image/jpeg;base64,' + response.data };
-                // alert(JSON.stringify(response));s
-                console.log('response', JSON.stringify(response));
-                this.setState({
-                    fileData: response.data,
-                    fileUri: response.uri
-                });
-            }
-        });
+                console.log('Error', error.message);
+            });
     }
 
-    launchCamera = () => {
-        let options = {
-            storageOptions: {
-                skipBackup: true,
-                path: 'images',
-            },
-        };
-        ImagePicker.launchCamera(options, (response) => {
-            console.log('Response = ', response);
+    updateImage= (img: any) => {
+        this.setState({imgFile: img});
+    };
 
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-            } else {
-                const source = { uri: response.uri };
-                console.log('response', JSON.stringify(response));
-                this.setState({
-                    fileData: response.data,
-                    fileUri: response.uri
-                });
-            }
-        });
+    updateModalImage= (img: any) => {
+        this.setState({modalImage: img});
+    };
 
+    addCoach = () => {
+        this.setState({modalVisible: true, modalType: 'coaches'});
+    }
+    addPlayer = () => {
+        this.setState({modalVisible: true, modalType: 'players'});
     }
 
-    launchImageLibrary = () => {
-        let options = {
-            storageOptions: {
-                skipBackup: true,
-                path: 'images',
-            },
-        };
-        ImagePicker.launchImageLibrary(options, (response) => {
-            console.log('Response = ', response);
-
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-            } else {
-                const source = { uri: response.uri };
-                console.log('response', JSON.stringify(response));
-                this.setState({
-                    fileData: response.data,
-                    fileUri: response.uri
-                });
-            }
-        });
-
-    }
-
-    renderFileData() {
-        if (this.state.fileData) {
-            return <Image source={{ uri: 'data:image/jpeg;base64,' + this.state.fileData }}
-                          style={styles.images}
-            />
-        } else {
-            return <Image source={require('../../../assets/images/myTeam-dummy.png')}
-                          style={styles.images}
-            />
+    saveMember = () => {
+        const listType = this.state.modalType ? this.state.modalType : 'coaches';
+        console.log("Type is", listType);
+        const currentList = this.state[listType as keyof MyClubState];
+        let currentMembers = Object.assign([], currentList);
+        const newMember = {
+            name: this.state.modalName,
+            image: this.state.modalImage.uri
         }
-    }
 
-    renderFileUri() {
-        if (this.state.fileUri) {
-            return <Image
-                source={{ uri: this.state.fileUri }}
-                style={styles.images}
-            />
+        currentMembers.push(newMember);
+
+        if(listType === 'coaches') {
+            this.setState({coaches: currentMembers, modalVisible: false, modalImage: null, modalName: ''});
         } else {
-            return <Image
-                source={require('../../../assets/images/myTeam-dummy.png')}
-                style={styles.images}
-            />
+            this.setState({players: currentMembers, modalVisible: false, modalImage: null, modalName: ''});
         }
-    }
+    };
 
+    renderListItem = (item: Member, index: number) => {
+        return <View key={index}>
+            <Image
+                style={styles.tinyLogo}
+                source={{ uri: item.image}}
+            />
+            <Text style={styles.listItem}>{item.name}</Text>
+        </View>
+    }
     render() {
+        const imgSrc = this.state.imgFile ? this.state.imgFile.uri : this.state.imgSrc;
         return (
-            <Fragment>
-                <StatusBar barStyle="dark-content" />
-                <SafeAreaView>
-                    <View style={styles.body}>
-                        <Text style={{textAlign:'center',fontSize:20,paddingBottom:10}} >Pick Images from Camera & Gallery</Text>
-                        <View style={styles.ImageSections}>
-                            <View>
-                                {this.renderFileData()}
-                                <Text  style={{textAlign:'center'}}>Base 64 String</Text>
-                            </View>
-                            <View>
-                                {this.renderFileUri()}
-                                <Text style={{textAlign:'center'}}>File Uri</Text>
-                            </View>
+            <SafeAreaView>
+                <View style={styles.body}>
+                    <Text style={styles.h1}>My Team</Text>
+                    <View style={styles.imageSections}>
+                        <View style={styles.teamBlock}>
+                            <ImagePickerComponent
+                                imgURI={imgSrc}
+                                onSelectImg={this.updateImage}
+                            />
+
+                            <TextInput
+                                style={styles.newTeamInput}
+                                onChangeText={text => this.setState({name: text})}
+                                value={this.state.name}
+                            />
                         </View>
-
-                        <View style={styles.btnParentSection}>
-                            <TouchableOpacity onPress={this.chooseImage} style={styles.btnSection}  >
-                                <Text style={styles.btnText}>Choose File</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity onPress={this.launchCamera} style={styles.btnSection}  >
-                                <Text style={styles.btnText}>Directly Launch Camera</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity onPress={this.launchImageLibrary} style={styles.btnSection}  >
-                                <Text style={styles.btnText}>Directly Launch Image Library</Text>
-                            </TouchableOpacity>
-                        </View>
-
                     </View>
-                </SafeAreaView>
-            </Fragment>
+
+                    <View>
+                        <Text style={styles.h2}>Coaches</Text>
+                        <Button title="Add Coach" onPress={this.addCoach}/>
+                    </View>
+
+                    <View style={styles.lists}>
+                        <FlatList
+                            data={this.state.coaches}
+                            renderItem={({item, index}) => this.renderListItem(item, index)}
+                        />
+                    </View>
+
+                    <View>
+                        <Text style={styles.h2}>Players</Text>
+                        <Button title="Add Coach" onPress={this.addPlayer}/>
+                    </View>
+                    <View style={styles.lists}>
+                        <FlatList
+                            data={this.state.players}
+                            renderItem={({item, index}) => this.renderListItem(item, index)}
+                        />
+                    </View>
+                </View>
+
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={this.state.modalVisible}
+                >
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+                            <View style={styles.teamBlock}>
+                                <ImagePickerComponent
+                                    imgURI={this.state.modalImage ? this.state.modalImage.uri : ''}
+                                    onSelectImg={this.updateModalImage}
+                                />
+
+                                <TextInput
+                                    style={styles.newPlayerInput}
+                                    onChangeText={text => this.setState({modalName: text})}
+                                    value={this.state.modalName}
+                                />
+                                <Button title="Save" onPress={this.saveMember}/>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+            </SafeAreaView>
         );
     }
 }
 
 const styles = StyleSheet.create({
-    scrollView: {
-        backgroundColor: Colors.lighter,
-    },
-
     body: {
-        backgroundColor: Colors.white,
-        justifyContent: 'center',
-        borderColor: 'black',
-        borderWidth: 1,
+        backgroundColor: Colors.black,
+        color: Colors.white,
         height: Dimensions.get('screen').height - 20,
         width: Dimensions.get('screen').width
     },
-    ImageSections: {
-        display: 'flex',
+    h1: {
+        color: 'white',
+        textAlign:'center',
+        fontSize:20,
+        paddingBottom:8
+    },
+    h2: {
+        color: 'white',
+        textAlign:'left',
+        fontSize:18,
+        marginTop:8
+    },
+    imageSections: {
+        flex: 1,
         flexDirection: 'row',
-        paddingHorizontal: 8,
-        paddingVertical: 8,
-        justifyContent: 'center'
+        alignItems: 'flex-start',
+        alignContent: 'flex-start',
+        flexWrap: 'wrap',
+        paddingHorizontal: 1,
+        paddingVertical: 1,
+    },
+    teamBlock: {
+        flex: 1,
+        flexBasis: Dimensions.get('window').width / 2 - 5,
+        flexGrow: 0,
+        paddingTop:2
+    },
+    newTeamInput : {
+        height: 40,
+        marginTop:2,
+        borderWidth: 0,
+        color: Colors.white
     },
     images: {
         width: 150,
@@ -205,23 +237,45 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         marginHorizontal: 3
     },
-    btnParentSection: {
-        alignItems: 'center',
-        marginTop:10
+    lists: {
+        flex: 1,
+        backgroundColor: "white",
     },
-    btnSection: {
-        width: 225,
-        height: 50,
-        backgroundColor: '#DCDCDC',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 3,
-        marginBottom:10
-    },
-    btnText: {
-        textAlign: 'center',
-        color: 'gray',
-        fontSize: 14,
-        fontWeight:'bold'
+    listItem: {
+        color: 'black',
+        padding: 10,
+        fontSize: 18,
+        height: 44,
     }
+    , centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22
+    }
+    , modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+    },
+    newPlayerInput : {
+        height: 40,
+        marginTop:2,
+        borderWidth: 0,
+        color: Colors.black
+    },
+    tinyLogo: {
+        width: 50,
+        height: 50,
+    },
 });

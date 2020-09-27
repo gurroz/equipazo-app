@@ -5,7 +5,7 @@ const OK = 200;
 const CREATED = 200;
 
 const apiConfig = {
-    baseUrl: 'http://10.0.0.4:8080/rest'
+    baseUrl: 'http://10.0.0.4:8080'
 };
 
 const restApiClient = axios.create({
@@ -45,4 +45,5 @@ const postMultiForm = (url, body, image, onSuccess, onError) => {
 export {
     restApiClient
     , postMultiForm
+    , apiConfig
 };

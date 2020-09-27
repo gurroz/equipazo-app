@@ -10,28 +10,30 @@ import {
     View
 } from "react-native";
 import React, {Component} from "react";
-import ImagePicker from 'react-native-image-picker';
 import {Colors} from "react-native/Libraries/NewAppScreen";
 import {apiGetTeams, apiSaveTeam} from "./my-team/MyTeamApi";
 import {TeamDTO} from "./my-team/TeamDTO";
 import AlertComponent from "../common/AlertComponent";
+import {HomeProps} from "../app/Router";
+import ImagePickerComponent from "../common/ImagePickerComponent";
 
-interface IProps {
-}
 
 type HomeState = {
     imgFile: any
     , name: string
+    , teams: any
 }
 
-export class Home extends Component<IProps, HomeState> {
+const DEFAULT_NAME = "My Team";
 
-    constructor(props: IProps) {
+export class Home extends Component<HomeProps, HomeState> {
+    constructor(props: HomeProps) {
         super(props);
 
         this.state = {
             imgFile: null
-            , name: 'My Team'
+            , name: DEFAULT_NAME
+            , teams: []
         };
     }
 
@@ -39,51 +41,12 @@ export class Home extends Component<IProps, HomeState> {
         this.getTeams();
     }
 
-    chooseImage = () => {
-        let options = {
-            title: 'Select Image',
-            // customButtons: [
-            //     { name: 'customOptionKey', title: 'Choose Photo from Custom Option' },
-            // ],
-            storageOptions: {
-                skipBackup: true,
-                path: 'images',
-            },
-        };
-        ImagePicker.showImagePicker(options, (response) => {
-            console.log('Response = ', response);
-
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-            } else {
-                // console.log('response', JSON.stringify(response));
-                this.setState({imgFile: response});
-            }
-        });
-    }
-
-    renderFileUri() {
-        if (this.state.imgFile) {
-            return <Image
-                source={{ uri: this.state.imgFile.uri }}
-                style={styles.images}
-            />
-        } else {
-            return <Image
-                source={require('../../assets/images/myTeam-dummy.png')}
-                style={styles.images}
-            />
-        }
-    }
     saveTeam = () => {
         const teamDTO = new TeamDTO(this.state.name);
         apiSaveTeam(teamDTO, this.state.imgFile, (response: any) => {
                 AlertComponent({title: "Saved Successful", message:"Saved Team Successfully"});
                 console.log("Response apiSaveTeam is", response);
+                this.getTeams();
             },
             (error: any) => {
                 AlertComponent({title: "Error", message:"Error saving Team"});
@@ -100,7 +63,8 @@ export class Home extends Component<IProps, HomeState> {
     getTeams = () => {
         console.log("Calling getTeam");
         apiGetTeams((response: any) => {
-                console.log("Response getTeams is", response.data);
+                console.log("Response getTeams is", response);
+                this.setState({teams: response, imgFile: null, name: DEFAULT_NAME})
             },
             (error: any) => {
                 AlertComponent({title: "Error", message:"Error getting Teams"});
@@ -114,17 +78,26 @@ export class Home extends Component<IProps, HomeState> {
             });
     }
 
+    teamDetail = (teamId: number) => {
+        this.props.navigation.navigate('MyTeam', {teamId})
+    }
+
+    updateImage= (img: any) => {
+        this.setState({imgFile: img});
+    };
+
     render() {
+        const imgSrc = this.state.imgFile ? this.state.imgFile.uri : '';
         return (
                 <SafeAreaView>
                     <View style={styles.body}>
                         <Text style={styles.h1}>My Teams</Text>
-                        <View style={styles.ImageSections}>
-                            <View>
-                                <TouchableHighlight onPress={this.chooseImage}>
-                                    {this.renderFileUri()}
-                                </TouchableHighlight>
-
+                        <View style={styles.imageSections}>
+                            <View style={styles.teamBlock}>
+                                <ImagePickerComponent
+                                    imgURI={imgSrc}
+                                    onSelectImg={this.updateImage}
+                                />
                                 <TextInput
                                     style={styles.newTeamInput}
                                     onChangeText={text => this.setState({name: text})}
@@ -134,6 +107,18 @@ export class Home extends Component<IProps, HomeState> {
                                     <Text style={styles.btnText}>Save</Text>
                                 </TouchableOpacity>
                             </View>
+                            {this.state.teams && this.state.teams.map( (team: any, i: number) =>
+                                <TouchableHighlight  key={i} onPress={() => this.teamDetail(team.id)}>
+                                    <View style={styles.teamBlock}>
+                                        <Image
+                                            source={{ uri: team.emblemURL }}
+                                            style={styles.images}
+                                            resizeMode={"cover"}
+                                        />
+                                        <Text style={styles.btnText}>{team.name}</Text>
+                                    </View>
+                                </TouchableHighlight>
+                                )}
                         </View>
                     </View>
                 </SafeAreaView>
@@ -154,11 +139,20 @@ const styles = StyleSheet.create({
         fontSize:20,
         paddingBottom:8
     },
-    ImageSections: {
-        display: 'flex',
+    imageSections: {
+        flex: 1,
         flexDirection: 'row',
+        alignItems: 'flex-start',
+        alignContent: 'flex-start',
+        flexWrap: 'wrap',
         paddingHorizontal: 1,
         paddingVertical: 1,
+    },
+    teamBlock: {
+        flex: 1,
+        flexBasis: Dimensions.get('window').width / 2 - 5,
+        flexGrow: 0,
+        paddingTop:2
     },
     newTeamInput : {
         height: 40,

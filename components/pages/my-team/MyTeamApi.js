@@ -1,9 +1,6 @@
-import {postMultiForm, restApiClient} from "../../app/api";
+import {apiConfig, postMultiForm, restApiClient} from "../../app/api";
 
 const apiSaveTeam = (body, emblem, onSuccess, onError) => {
-
-    // payload.append("teamData", JSON.stringify(body));
-
     let img = {
         name: 'file'
         , filename: emblem.fileName
@@ -16,11 +13,40 @@ const apiSaveTeam = (body, emblem, onSuccess, onError) => {
         , data: body
     }
 
-    postMultiForm('/teams/', payload, img, onSuccess, onError);
+    postMultiForm('/rest/teams/', payload, img, onSuccess, onError);
 }
 
  const apiGetTeams = (onSuccess, onError) => {
-    restApiClient.get('/teams/').then(resp => {onSuccess(resp)}).catch(err => {onError(err)});
+    restApiClient.get('/rest/teams/').then(resp => {
+        if(resp.data) {
+            const adaptedTeam = resp.data.map( team => {
+                return {
+                    id: team.id
+                    , name: team.name
+                    , emblemURL: apiConfig.baseUrl + team.emblemURL
+                }
+            })
+            onSuccess(adaptedTeam);
+        }
+    }).catch(err => {onError(err)});
 }
 
-export {apiGetTeams, apiSaveTeam}
+const apiGetTeam = (teamId, onSuccess, onError) => {
+    restApiClient.get(`/rest/teams/${teamId}`).then(resp => {
+        if(resp.data) {
+            const adaptedTeam = {
+                id: resp.data.id
+                , name: resp.data.name
+                , emblemURL: apiConfig.baseUrl + resp.data.emblemURL
+            }
+
+            onSuccess(adaptedTeam);
+        }
+    }).catch(err => {onError(err)});
+}
+
+export {
+    apiGetTeams
+    , apiSaveTeam
+    , apiGetTeam
+}
