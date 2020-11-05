@@ -4,7 +4,9 @@ import React from "react";
 
 interface Props {
     imgURI: any
+    , defaultImg: object
     , onSelectImg: any
+    , style?: any
 }
 
 export default function ImagePickerComponent(props: Props) {
@@ -15,6 +17,8 @@ export default function ImagePickerComponent(props: Props) {
             storageOptions: {
                 skipBackup: true,
                 path: 'images',
+                maxWidth: '600',
+                maxHeight: '800'
             },
         };
         ImagePicker.showImagePicker(options, (response) => {
@@ -32,9 +36,9 @@ export default function ImagePickerComponent(props: Props) {
 
     const renderFileUri = () => {
         if (props.imgURI) {
-            return <Image source={{ uri: props.imgURI}} style={styles.images}/>
+            return <Image source={{ uri: props.imgURI}} style={props.style || styles.images}/>
         } else {
-            return <Image source={require("../../assets/images/myTeam-dummy.png")} style={styles.images}/>
+            return <Image source={props.defaultImg} style={props.style || styles.images}/>
         }
     }
 
@@ -48,8 +52,7 @@ const styles = StyleSheet.create({
     images: {
         width: 150,
         height: 150,
-        borderColor: 'black',
-        borderWidth: 1,
+        borderWidth: 0,
         marginHorizontal: 3
     }
 });

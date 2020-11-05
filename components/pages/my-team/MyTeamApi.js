@@ -1,30 +1,73 @@
-import {apiConfig, postMultiForm, restApiClient} from "../../app/api";
+import {apiConfig, postMultiForm, putMultiForm, restApiClient} from "../../app/api";
+import {TeamDTO} from "./TeamDTO";
+import {TeamMemberDTO} from "./TeamMemberDTO";
 
-const apiSaveTeam = (body, emblem, onSuccess, onError) => {
-    let img = {
-        name: 'file'
-        , filename: emblem.fileName
-        , type: emblem.type
-        , uri: Platform.OS === "android" ? emblem.uri : emblem.uri.replace("file://", "")
-    };
+const baseURl = '/rest/teams/';
+const apiCreateTeam = (body, emblem, onSuccess, onError) => {
+    let img = null;
+    if(emblem) {
+        img = {
+            name: 'file'
+            , filename: emblem.fileName
+            , type: emblem.type
+            , uri: Platform.OS === "android" ? emblem.uri : emblem.uri.replace("file://", "")
+        };
+    }
 
     let payload = {
-        name: 'teamData'
+        name: 'data'
         , data: body
     }
 
-    postMultiForm('/rest/teams/', payload, img, onSuccess, onError);
+    postMultiForm(baseURl, payload, img, onSuccess, onError);
 }
 
- const apiGetTeams = (onSuccess, onError) => {
-    restApiClient.get('/rest/teams/').then(resp => {
+const apiSaveTeam = (body, emblem, onSuccess, onError) => {
+    let img = null;
+    if(emblem) {
+        img = {
+            name: 'file'
+            , filename: emblem.fileName
+            , type: emblem.type
+            , uri: Platform.OS === "android" ? emblem.uri : emblem.uri.replace("file://", "")
+        };
+    }
+    console.log("apiSaveTeam: ", body);
+    let payload = {
+        name: 'data'
+        , data: body
+    }
+
+    putMultiForm(`${baseURl}${body.id}`, payload, img, onSuccess, onError);
+}
+
+const apiSaveTeamMember = (id, body, picture, onSuccess, onError) => {
+    let img = null;
+    if(picture) {
+        img = {
+            name: 'file'
+            , filename: picture.fileName
+            , type: picture.type
+            , uri: Platform.OS === "android" ? picture.uri : picture.uri.replace("file://", "")
+        };
+    }
+
+    let payload = {
+        name: 'data'
+        , data: body
+    }
+    console.log("apiSaveTeamMember ", payload);
+
+    putMultiForm(`${baseURl}${id}/team-member`, payload, img, onSuccess, onError);
+}
+
+ const apiAllGetTeams = (onSuccess, onError) => {
+    restApiClient.get(baseURl).then(resp => {
         if(resp.data) {
+            console.log("apiAllGetTeams resp:", resp.DATA);
             const adaptedTeam = resp.data.map( team => {
-                return {
-                    id: team.id
-                    , name: team.name
-                    , emblemURL: apiConfig.baseUrl + team.emblemURL
-                }
+                console.log("apiAllGetTeams resp 2:", team);
+                return new TeamDTO(team.id, team.name,apiConfig.baseUrl + team.emblemURL);
             })
             onSuccess(adaptedTeam);
         }
@@ -32,21 +75,30 @@ const apiSaveTeam = (body, emblem, onSuccess, onError) => {
 }
 
 const apiGetTeam = (teamId, onSuccess, onError) => {
-    restApiClient.get(`/rest/teams/${teamId}`).then(resp => {
+    restApiClient.get(`${baseURl}${teamId}`).then(resp => {
         if(resp.data) {
-            const adaptedTeam = {
-                id: resp.data.id
-                , name: resp.data.name
-                , emblemURL: apiConfig.baseUrl + resp.data.emblemURL
-            }
+            const team = resp.data;
+            let response = new TeamDTO(team.id, team.name,apiConfig.baseUrl + team.emblemURL);
+            response.coaches = team.coaches.map( coach => {
+                let member = new TeamMemberDTO(coach.name, apiConfig.baseUrl + coach.picture, coach.mobile);
+                member.id = coach.id;
+                return member;
+            });
 
-            onSuccess(adaptedTeam);
+            response.players = team.players.map( player => {
+                let member = new TeamMemberDTO(player.name, apiConfig.baseUrl + player.picture, player.mobile);
+                member.id = player.id;
+                return member;
+            });
+            onSuccess(response);
         }
     }).catch(err => {onError(err)});
 }
 
 export {
-    apiGetTeams
+    apiAllGetTeams
+    , apiCreateTeam
     , apiSaveTeam
     , apiGetTeam
+    , apiSaveTeamMember
 }

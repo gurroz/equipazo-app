@@ -1,26 +1,19 @@
-import {
-    Dimensions,
-    Image,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableHighlight,
-    TouchableOpacity,
-    View
-} from "react-native";
+import {Dimensions, ScrollView, StyleSheet} from "react-native";
 import React, {Component} from "react";
-import {Colors} from "react-native/Libraries/NewAppScreen";
-import {apiGetTeams, apiSaveTeam} from "./my-team/MyTeamApi";
+import {Block, Button, Card, Input} from 'galio-framework';
+import {apiAllGetTeams, apiCreateTeam} from "./my-team/MyTeamApi";
 import {TeamDTO} from "./my-team/TeamDTO";
 import AlertComponent from "../common/AlertComponent";
 import {HomeProps} from "../app/Router";
+import {Team} from "../../domain/Team";
+import theme from '../app/theme';
 import ImagePickerComponent from "../common/ImagePickerComponent";
+import {DEFAULT_IMAGES} from "../app/images";
 
 
 type HomeState = {
-    imgFile: any
-    , name: string
+    currentTeamImage: any
+    , currentTeamName: string
     , teams: any
 }
 
@@ -31,8 +24,8 @@ export class Home extends Component<HomeProps, HomeState> {
         super(props);
 
         this.state = {
-            imgFile: null
-            , name: DEFAULT_NAME
+            currentTeamImage: null
+            , currentTeamName: ""
             , teams: []
         };
     }
@@ -42,10 +35,10 @@ export class Home extends Component<HomeProps, HomeState> {
     }
 
     saveTeam = () => {
-        const teamDTO = new TeamDTO(this.state.name);
-        apiSaveTeam(teamDTO, this.state.imgFile, (response: any) => {
+        const teamDTO = new TeamDTO(0, this.state.currentTeamName, "");
+        apiCreateTeam(teamDTO, this.state.currentTeamImage, (response: any) => {
                 AlertComponent({title: "Saved Successful", message:"Saved Team Successfully"});
-                console.log("Response apiSaveTeam is", response);
+                console.log("Response apiCreateTeam is", response);
                 this.getTeams();
             },
             (error: any) => {
@@ -62,9 +55,14 @@ export class Home extends Component<HomeProps, HomeState> {
 
     getTeams = () => {
         console.log("Calling getTeam");
-        apiGetTeams((response: any) => {
+        apiAllGetTeams((response: any) => {
                 console.log("Response getTeams is", response);
-                this.setState({teams: response, imgFile: null, name: DEFAULT_NAME})
+                const teams = response.map( (teamDTO: TeamDTO) => {
+                    const team = teamDTO.toTeam();
+                    console.log("Team is", team);
+                    return team;
+                })
+                this.setState({teams: teams, currentTeamImage: null, currentTeamName: ""})
             },
             (error: any) => {
                 AlertComponent({title: "Error", message:"Error getting Teams"});
@@ -83,98 +81,95 @@ export class Home extends Component<HomeProps, HomeState> {
     }
 
     updateImage= (img: any) => {
-        this.setState({imgFile: img});
+        this.setState({currentTeamImage: img});
     };
 
     render() {
-        const imgSrc = this.state.imgFile ? this.state.imgFile.uri : '';
+        const imgSrc = this.state.currentTeamImage ? this.state.currentTeamImage.uri : '';
         return (
-                <SafeAreaView>
-                    <View style={styles.body}>
-                        <Text style={styles.h1}>My Teams</Text>
-                        <View style={styles.imageSections}>
-                            <View style={styles.teamBlock}>
-                                <ImagePickerComponent
-                                    imgURI={imgSrc}
-                                    onSelectImg={this.updateImage}
-                                />
-                                <TextInput
-                                    style={styles.newTeamInput}
-                                    onChangeText={text => this.setState({name: text})}
-                                    value={this.state.name}
-                                />
-                                <TouchableOpacity onPress={this.saveTeam} >
-                                    <Text style={styles.btnText}>Save</Text>
-                                </TouchableOpacity>
-                            </View>
-                            {this.state.teams && this.state.teams.map( (team: any, i: number) =>
-                                <TouchableHighlight  key={i} onPress={() => this.teamDetail(team.id)}>
-                                    <View style={styles.teamBlock}>
-                                        <Image
-                                            source={{ uri: team.emblemURL }}
-                                            style={styles.images}
-                                            resizeMode={"cover"}
-                                        />
-                                        <Text style={styles.btnText}>{team.name}</Text>
-                                    </View>
-                                </TouchableHighlight>
-                                )}
-                        </View>
-                    </View>
-                </SafeAreaView>
+            <ScrollView contentContainerStyle={styles.cards}>
+            <Block flex space="between">
+                <Block
+                    key={`card-new`}
+                    card={true}
+                    center={true}
+                    fluid={true}
+                    shadow={true}
+                    style={styles.card}
+                    shadowColor={theme.COLORS.BLACK}>
+
+                    <ImagePickerComponent
+                        imgURI={imgSrc}
+                        onSelectImg={this.updateImage}
+                        defaultImg={DEFAULT_IMAGES.team}
+                    />
+                    <Input
+                        onChangeText={(text: string) => this.setState({currentTeamName: text})}
+                        placeholder={DEFAULT_NAME}
+                        value={this.state.currentTeamName}
+                        color={theme.COLORS.THEME}
+                        style={{ borderColor: theme.COLORS.THEME}}
+                        placeholderTextColor={theme.COLORS.THEME} />
+                    <Button round size="small" color="info" onPress={this.saveTeam}>Save</Button>
+                </Block>
+                {this.state.teams && this.state.teams.map( (team: Team, i: number) =>
+                    <Block key={`card-${team.name}`}>
+                        <Button
+                            color="transparent"
+                            shadowless
+                            style={styles.cardButton}
+                            onPress={() => this.teamDetail(team.id)}>
+                            <Card
+                                flex
+                                borderless
+                                style={styles.card}
+                                title={team.name}
+                                caption={`${team.players ? team.players.length : 0} players`}
+                                image={team.emblem}
+                                imageStyle={styles.rounded}
+                                shadowColor={theme.COLORS.BLACK}
+                                imageBlockStyle={{padding: theme.SIZES.BASE / 2}}
+                            />
+                        </Button>
+                    </Block>
+                )}
+            </Block>
+            </ScrollView>
         );
     }
 }
 
+const { width } = Dimensions.get('screen');
+
 const styles = StyleSheet.create({
-    body: {
-        backgroundColor: Colors.black,
-        color: Colors.white,
-        height: Dimensions.get('screen').height - 20,
-        width: Dimensions.get('screen').width
-    },
-    h1: {
-        color: 'white',
-        textAlign:'center',
-        fontSize:20,
-        paddingBottom:8
-    },
-    imageSections: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        alignContent: 'flex-start',
-        flexWrap: 'wrap',
-        paddingHorizontal: 1,
-        paddingVertical: 1,
-    },
-    teamBlock: {
-        flex: 1,
-        flexBasis: Dimensions.get('window').width / 2 - 5,
-        flexGrow: 0,
-        paddingTop:2
-    },
-    newTeamInput : {
-        height: 40,
-        marginTop:2,
-        borderWidth: 0,
-        color: Colors.white
-    },
-    images: {
-        width: 150,
-        height: 150,
-        borderColor: 'black',
-        borderWidth: 1,
-        marginHorizontal: 3
-    },
-    btnParentSection: {
+    cards: {
+        width,
+        backgroundColor: theme.COLORS.NEUTRAL,
         alignItems: 'center',
-        marginTop:10
+        justifyContent: 'flex-start',
     },
-    btnText: {
-        textAlign: 'center',
-        color: 'gray',
-        fontSize: 14,
-        fontWeight:'bold'
+    card: {
+        backgroundColor: theme.COLORS.WHITE,
+        width: width - theme.SIZES.BASE * 2,
+        marginVertical: theme.SIZES.BASE * 0.875,
+        elevation: theme.SIZES.BASE / 2,
+        padding: 5
+    },
+    full: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        left: 0,
+    },
+    noRadius: {
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+    },
+    rounded: {
+        borderRadius: theme.SIZES.BASE * 0.1875,
+    },
+    cardButton: {
+        width: 'auto',
+        height: 'auto',
     }
 });
