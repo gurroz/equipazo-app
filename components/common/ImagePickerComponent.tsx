@@ -36,7 +36,7 @@ export default function ImagePickerComponent(props: Props) {
 
     const renderFileUri = () => {
         if (props.imgURI) {
-            return <Image source={{ uri: props.imgURI}} style={props.style || styles.images}/>
+            return <Image source={{ uri: props.imgURI, headers: {Pragma: 'no-cache'}}} style={props.style || styles.images}/>
         } else {
             return <Image source={props.defaultImg} style={props.style || styles.images}/>
         }

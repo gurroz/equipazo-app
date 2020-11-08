@@ -86,7 +86,8 @@ const apiGetTeam = (teamId, onSuccess, onError) => {
             });
 
             response.players = team.players.map( player => {
-                let member = new TeamMemberDTO(player.name, apiConfig.baseUrl + player.picture, player.mobile);
+                const picture = player.picture ? apiConfig.baseUrl + player.picture: null;
+                let member = new TeamMemberDTO(player.name, picture, player.mobile);
                 member.id = player.id;
                 return member;
             });

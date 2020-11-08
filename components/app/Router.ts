@@ -8,9 +8,11 @@ type RootDrawerProps = {
 
 type HomeProps = DrawerScreenProps<RootDrawerProps, 'Home'>;
 type MyTeamProps = DrawerScreenProps<RootDrawerProps, 'MyTeam'>;
+type FormationsProps = DrawerScreenProps<RootDrawerProps, 'Formations'>;
 
 
 export type {
     HomeProps
     , MyTeamProps
+    , FormationsProps
 };

@@ -1,18 +1,9 @@
-import {
-    Dimensions,
-    FlatList,
-    Image,
-    Modal,
-    SafeAreaView,
-    StyleSheet,
-    TextInput,
-    View
-} from "react-native";
+import {Dimensions, FlatList, Image, Modal, StyleSheet} from "react-native";
 import React, {Component} from "react";
 import {Colors} from "react-native/Libraries/NewAppScreen";
 import {MyTeamProps} from "../../app/Router";
 import ImagePickerComponent from "../../common/ImagePickerComponent";
-import {apiGetTeam, apiSaveTeamMember, apiSaveTeam} from "./MyTeamApi";
+import {apiGetTeam, apiSaveTeam, apiSaveTeamMember} from "./MyTeamApi";
 import AlertComponent from "../../common/AlertComponent";
 import {TeamDTO} from "./TeamDTO";
 import {Team} from "../../../domain/Team";
@@ -20,8 +11,7 @@ import {TeamMember} from "../../../domain/TeamMember";
 import isEqual from "lodash.isequal";
 import {TeamMemberDTO} from "./TeamMemberDTO";
 import {DEFAULT_IMAGES} from "../../app/images";
-import {Block, Button, Card, Input, Text} from 'galio-framework';
-import { ScrollView } from "react-native";
+import {Block, Button, Icon, Input, Text} from 'galio-framework';
 import theme from "../../app/theme";
 
 
@@ -121,22 +111,23 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
         console.log("Rendering TeamMember", item);
         return <Block flex id={`id-${item.name}`} key={`key-${item.name}`}>
             <Block row>
-            { item.picture !== undefined &&
+
             <Block>
+                {item.picture &&
                 <Image
+                    key={`pic-${item.name}`}
                     style={styles.avatar}
                     source={{ uri: item.picture}}
                 />
-            </Block>
-            }
-            {item.picture === undefined &&
-            <Block>
+                }
+                {!item.picture &&
                 <Image
+                    key={`pic-${item.name}`}
                     style={styles.avatar}
                     source={require("../../../assets/images/player-dummy.png")}
                 />
+                }
             </Block>
-            }
             <Block>
                 <Text style={styles.listItem}>{item.name}</Text>
             </Block>
@@ -265,7 +256,7 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
         const teamName = this.state.team.name || '';
         return (
             <Block safe flex>
-                <Block flex style={styles.emblemHolder}>
+                <Block style={styles.emblemHolder}>
                     <ImagePickerComponent
                         imgURI={imgSrc}
                         onSelectImg={this.updateImage}
@@ -274,20 +265,22 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
                     />
                 </Block>
 
-                <Block flex center={true}>
+                <Block center={true}>
                     <Text h2>{teamName}</Text>
                 </Block>
-                <Block flex>
+                <Block>
                     <Block row>
                         <Block row middle style={{ marginHorizontal: theme.SIZES.BASE }}>
-                            <Text h4>Coaches</Text>
+                            <Text h4>Players</Text>
                         </Block>
                         <Block row>
-                            <Button round size="small" color="info" onPress={this.addCoach}>Add</Button>
+                            <Button onlyIcon onPress={this.addPlayer} icon="adduser" iconFamily="antdesign" iconSize={30}
+                                    color="success" iconColor="#fff" style={{ width: 40, height: 40 }}>Add</Button>
                         </Block>
                     </Block>
                     <Block row right>
                         <FlatList
+                            style={{ backgroundColor: theme.COLORS.WHITE, margin: 5, padding: 5}}
                             data={this.state.team.players}
                             renderItem={({item, index}) => this.renderListItem(item, index)}
                         />
