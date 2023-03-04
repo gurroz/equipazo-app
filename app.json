@@ -1,4 +1,9 @@
 {
-  "name": "EquipazoApp",
-  "displayName": "EquipazoApp"
+  "expo": {
+    "slug": "EquipazoApp",
+    "name": "EquipazoApp",
+    "sdkVersion": "42.0.0",
+    "entryPoint": ".vscode/exponentIndex.js"
+  },
+  "name": "EquipazoApp"
 }

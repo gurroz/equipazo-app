@@ -13,7 +13,6 @@ export default function App() {
                 <Drawer.Screen name="Home" component={Home} options={{ title: 'Home' }}/>
                 <Drawer.Screen name="MyTeam" component={MyTeam} options={{ title: 'My Team' }}/>
                 <Drawer.Screen name="Formations" component={Formation} options={{ title: 'Formations' }}/>
-
             </Drawer.Navigator>
         </NavigationContainer>
   );

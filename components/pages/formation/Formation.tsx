@@ -1,26 +1,26 @@
-import {ImageBackground, StyleSheet} from "react-native";
-import React, {Component} from "react";
-import {FIELD_BK} from "../../../assets/images";
-import DragableCircularButton from "../../common/DragableCircularButton";
-import {Block} from "galio-framework";
-import {FormationsProps, MyTeamProps} from "../../app/Router";
-import {Team} from "../../../domain/Team";
-import {apiGetTeam} from "../my-team/MyTeamApi";
-import {TeamDTO} from "../my-team/TeamDTO";
+import { Block } from "galio-framework";
+import React, { Component } from "react";
+import { ImageBackground, StyleSheet } from "react-native";
+import { FIELD_BK } from "../../../assets/images";
+import { Team } from "../../../domain/Team";
+import { TeamMember } from "../../../domain/TeamMember";
+import { FormationsProps, MyTeamProps } from "../../app/Router";
 import AlertComponent from "../../common/AlertComponent";
-import {TeamMember} from "../../../domain/TeamMember";
+import DragableCircularButton from "../../common/DragableCircularButton";
+import { apiGetTeam } from "../my-team/MyTeamApi";
+import { TeamDTO } from "../my-team/TeamDTO";
 
 type FormationState = {
     teamImgFile: any
-    , team : Team
+    , team: Team
     , teamMemberImgFile: any
     , teamMember: TeamMember
     , modalVisible: boolean
-    , modalType : string
+    , modalType: string
     , isDirty: boolean
 }
 
-export class Formation extends Component<FormationsProps, FormationState> {
+export default class Formation extends Component<FormationsProps, FormationState> {
     constructor(props: MyTeamProps) {
         super(props);
 
@@ -44,18 +44,18 @@ export class Formation extends Component<FormationsProps, FormationState> {
     getTeam = () => {
         console.log("Calling getTeam");
         apiGetTeam(this.state.team.id, (response: TeamDTO) => {
-                console.log("Response getTeam:", response);
-                const team = response.toTeam();
-                console.log("Trasformed getTeam is", team);
+            console.log("Response getTeam:", response);
+            const team = response.toTeam();
+            console.log("Trasformed getTeam is", team);
 
-                this.setState({team: team, modalVisible: false, teamMemberImgFile: null, teamMember: this.defaultTeamMember(), isDirty:false});
-            },
+            this.setState({ team: team, modalVisible: false, teamMemberImgFile: null, teamMember: this.defaultTeamMember(), isDirty: false });
+        },
             (error: any) => {
-                AlertComponent({title: "Error", message:"Error getting Team"});
-                if(error.response)
+                AlertComponent({ title: "Error", message: "Error getting Team" });
+                if (error.response)
                     console.log(error.response.data);
 
-                if(error.request)
+                if (error.request)
                     console.log(error.request);
 
                 console.log('Error', error.message);
@@ -65,14 +65,14 @@ export class Formation extends Component<FormationsProps, FormationState> {
     render() {
         return (
             <Block safe>
-            <ImageBackground source={FIELD_BK} style={styles.image}>
-                {this.state.players
-                    && this.state.players.map((player, index) => {
-                        return <DragableCircularButton name={player.name} onShortPress={ () => console.log("WEENA")}/>
-                    })
-                }
-            </ImageBackground>
-        </Block>)
+                <ImageBackground source={FIELD_BK} style={styles.image}>
+                    {this.state.players
+                        && this.state.players.map((player, index) => {
+                            return <DragableCircularButton name={player.name} onShortPress={() => console.log("WEENA")} />
+                        })
+                    }
+                </ImageBackground>
+            </Block>)
     }
 }
 
