@@ -1,4 +1,4 @@
-import {TeamMember} from "../../../domain/TeamMember";
+import {TeamMember} from "../domain/TeamMember";
 
 export class TeamMemberDTO {
     id: number | undefined;

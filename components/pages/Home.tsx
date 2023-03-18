@@ -1,8 +1,8 @@
 import {Dimensions, ScrollView, StyleSheet} from "react-native";
 import React, {Component} from "react";
 import {Block, Button, Card, Input} from 'galio-framework';
-import {apiAllGetTeams, apiCreateTeam} from "./my-team/MyTeamApi";
-import {TeamDTO} from "./my-team/TeamDTO";
+import {apiAllGetTeams, apiCreateTeam} from "../../repository/TeamApi";
+import {TeamDTO} from "../../repository/TeamDTO";
 import AlertComponent from "../common/AlertComponent";
 import {HomeProps} from "../app/Router";
 import {Team} from "../../domain/Team";

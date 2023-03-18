@@ -5,8 +5,8 @@ import DragableCircularButton from "../../common/DragableCircularButton";
 import {Block} from "galio-framework";
 import {FormationsProps, MyTeamProps} from "../../app/Router";
 import {Team} from "../../../domain/Team";
-import {apiGetTeam} from "../my-team/MyTeamApi";
-import {TeamDTO} from "../my-team/TeamDTO";
+import {apiGetTeam} from "../../../repository/TeamApi";
+import {TeamDTO} from "../../../repository/TeamDTO";
 import AlertComponent from "../../common/AlertComponent";
 import {TeamMember} from "../../../domain/TeamMember";
 

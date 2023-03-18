@@ -1,27 +1,25 @@
-import {Dimensions, FlatList, Image, Modal, StyleSheet} from "react-native";
-import React, {Component} from "react";
-import {Colors} from "react-native/Libraries/NewAppScreen";
-import {MyTeamProps} from "../../app/Router";
-import ImagePickerComponent from "../../common/ImagePickerComponent";
-import {apiGetTeam, apiSaveTeam, apiSaveTeamMember} from "./MyTeamApi";
-import AlertComponent from "../../common/AlertComponent";
-import {TeamDTO} from "./TeamDTO";
-import {Team} from "../../../domain/Team";
-import {TeamMember} from "../../../domain/TeamMember";
+import { Block, Button, Input, Text } from 'galio-framework';
 import isEqual from "lodash.isequal";
-import {TeamMemberDTO} from "./TeamMemberDTO";
-import {DEFAULT_IMAGES} from "../../app/images";
-import {Block, Button, Icon, Input, Text} from 'galio-framework';
+import React, { Component } from "react";
+import { Dimensions, FlatList, Image, Modal, StyleSheet } from "react-native";
+import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Team } from "../../../domain/Team";
+import { TeamMember } from "../../../domain/TeamMember";
+import TeamRepository from "../../../repository/TeamRepository";
+import { DEFAULT_IMAGES } from "../../app/images";
+import { MyTeamProps } from "../../app/Router";
 import theme from "../../app/theme";
+import AlertComponent from "../../common/AlertComponent";
+import ImagePickerComponent from "../../common/ImagePickerComponent";
 
 
 type MyClubState = {
     teamImgFile: any
-    , team : Team
+    , team: Team
     , teamMemberImgFile: any
     , teamMember: TeamMember
     , modalVisible: boolean
-    , modalType : string
+    , modalType: string
     , isDirty: boolean
 }
 const COACH = 'COACH';
@@ -29,10 +27,13 @@ const PLAYER = 'PLAYER';
 const DEFAULT_TEAM_MEMBER_NAME = "Member's Name";
 const DEFAULT_TEAM_MEMBER_MOBILE = "+569";
 export class MyTeam extends Component<MyTeamProps, MyClubState> {
+    private teamRepo: TeamRepository;
     constructor(props: MyTeamProps) {
         super(props);
 
         const team = new Team("", props.route.params.teamId, "");
+        this.teamRepo = TeamRepository.getInstance();
+
         this.state = {
             team: team
             , teamImgFile: null
@@ -73,38 +74,24 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
 
     getTeam = () => {
         console.log("Calling getTeam");
-        apiGetTeam(this.state.team.id, (response: TeamDTO) => {
-                console.log("Response getTeam:", response);
-                const team = response.toTeam();
-                console.log("Trasformed getTeam is", team);
+        const team = this.teamRepo.getTeam(this.state.team.id);
 
-                this.setState({team: team, modalVisible: false, teamMemberImgFile: null, teamMember: this.defaultTeamMember(), isDirty:false});
-            },
-            (error: any) => {
-                AlertComponent({title: "Error", message:"Error getting Team"});
-                if(error.response)
-                    console.log(error.response.data);
-
-                if(error.request)
-                    console.log(error.request);
-
-                console.log('Error', error.message);
-            });
+        this.setState({ team: team, modalVisible: false, teamMemberImgFile: null, teamMember: this.defaultTeamMember(), isDirty: false });
     }
 
-    updateImage= (img: any) => {
-        this.setState({teamImgFile: img, isDirty: true});
+    updateImage = (img: any) => {
+        this.setState({ teamImgFile: img, isDirty: true });
     };
 
-    updateModalImage= (img: any) => {
-        this.setState({teamMemberImgFile: img, isDirty: true});
+    updateModalImage = (img: any) => {
+        this.setState({ teamMemberImgFile: img, isDirty: true });
     };
 
     addCoach = () => {
-        this.setState({modalVisible: true, modalType: COACH});
+        this.setState({ modalVisible: true, modalType: COACH });
     }
     addPlayer = () => {
-        this.setState({modalVisible: true, modalType: PLAYER});
+        this.setState({ modalVisible: true, modalType: PLAYER });
     }
 
     renderListItem = (item: TeamMember, index: number) => {
@@ -112,49 +99,35 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
         return <Block flex id={`id-${item.name}`} key={`key-${item.name}`}>
             <Block row>
 
-            <Block>
-                {item.picture &&
-                <Image
-                    key={`pic-${item.name}`}
-                    style={styles.avatar}
-                    source={{ uri: item.picture}}
-                />
-                }
-                {!item.picture &&
-                <Image
-                    key={`pic-${item.name}`}
-                    style={styles.avatar}
-                    source={require("../../../assets/images/player-dummy.png")}
-                />
-                }
+                <Block>
+                    {item.picture &&
+                        <Image
+                            key={`pic-${item.name}`}
+                            style={styles.avatar}
+                            source={{ uri: item.picture }}
+                        />
+                    }
+                    {!item.picture &&
+                        <Image
+                            key={`pic-${item.name}`}
+                            style={styles.avatar}
+                            source={require("../../../assets/images/player-dummy.png")}
+                        />
+                    }
+                </Block>
+                <Block>
+                    <Text style={styles.listItem}>{item.name}</Text>
+                </Block>
+                <Block right>
+                    <Text muted style={styles.listItem}>{item.mobile}</Text>
+                </Block>
             </Block>
-            <Block>
-                <Text style={styles.listItem}>{item.name}</Text>
-            </Block>
-            <Block right>
-                <Text muted style={styles.listItem}>{item.mobile}</Text>
-            </Block>
-        </Block>
         </Block>
     }
 
     synchronizeTeam = () => {
-        const teamDTO = new TeamDTO(this.state.team.id, this.state.team.name, "");
-
-        apiSaveTeam(teamDTO, this.state.teamImgFile, (response: any) => {
-                AlertComponent({title: "Saved Successful", message:"Saved Team Successfully"});
-                console.log("Response apiSaveTeam is", response);
-            },
-            (error: any) => {
-                AlertComponent({title: "Error", message:"Error saving Team"});
-                if(error.response)
-                    console.log(error.response.data);
-
-                if(error.request)
-                    console.log(error.request);
-
-                console.log('Error', error.message);
-            });
+        this.teamRepo.saveTeam(this.state.team);
+        AlertComponent({ title: "Saved Successful", message: "Saved Team Successfully" });
     }
 
     synchronizeCoaches = () => {
@@ -162,14 +135,14 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
 
     }
 
-    synchronizePlayers = ()=> {
+    synchronizePlayers = () => {
         console.log("Synchronising players");
-        this.setState({teamMemberImgFile: null});
+        this.setState({ teamMemberImgFile: null });
     }
 
-    onTeamNameChange = (newName : string) => {
+    onTeamNameChange = (newName: string) => {
         console.log("Updating name", newName, this.state.team);
-        let team = Object.assign({},this.state.team);
+        let team = Object.assign({}, this.state.team);
         // if(!newName || newName.length < 3) {
         //     AlertComponent({title: "Error", message:"Team name must be at least 3 character long"});
         // } else {
@@ -180,10 +153,10 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
         team.name = newName;
         console.log("Updating name2 ", team);
 
-        this.setState({team: team, isDirty: true});
+        this.setState({ team: team, isDirty: true });
     }
 
-    onTeamMemberChange = (newName : string, newMobile: string) => {
+    onTeamMemberChange = (newName: string, newMobile: string) => {
         let teamMember = Object.assign({}, this.state.teamMember);
         // if(!newName || newName.length < 2) {
         //     AlertComponent({title: "Error", message:"Team member must be at least 3 character long"});
@@ -191,15 +164,15 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
         //     teamMember.name = newName;
         //     this.setState({teamMember: teamMember});
         // }
-        if(newName)
+        if (newName)
             teamMember.name = newName;
 
-        if(newMobile)
+        if (newMobile)
             teamMember.mobile = newMobile;
-        this.setState({teamMember: teamMember, isDirty: true});
+        this.setState({ teamMember: teamMember, isDirty: true });
     }
 
-    isMemberCoaches = () =>{
+    isMemberCoaches = () => {
         const listType = this.state.modalType ? this.state.modalType : COACH;
         return isEqual(listType, COACH);
     }
@@ -207,7 +180,7 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
     addMemberToTeam = (teamMember: TeamMember) => {
         const team = Object.assign({}, this.state.team);
         let currentMembers = [];
-        if(this.isMemberCoaches()) {
+        if (this.isMemberCoaches()) {
             currentMembers = Object.assign([], this.state.team.coaches);
             currentMembers.push(teamMember)
             console.log("Updated members", currentMembers);
@@ -222,34 +195,34 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
         }
 
 
-        this.setState({team: team, modalVisible: false, teamMember: this.defaultTeamMember(), isDirty: false});
+        this.setState({ team: team, modalVisible: false, teamMember: this.defaultTeamMember(), isDirty: false });
     }
 
-    saveMember = () => {
-        const teamMember =  TeamMemberDTO.fromTeamMember(this.state.teamMember);
-        teamMember.type  = this.state.modalType;
+    // saveMember = () => {
+    //     const teamMember =  TeamMemberDTO.fromTeamMember(this.state.teamMember);
+    //     teamMember.type  = this.state.modalType;
 
-        if(teamMember.isValid()) {
-            apiSaveTeamMember(this.state.team.id, teamMember, this.state.teamMemberImgFile, (response: any) => {
-                    AlertComponent({title: "Saved Successful", message: "Saved Member Successfully"});
-                    console.log("Response apiSaveTeam is", response);
+    //     if(teamMember.isValid()) {
+    //         apiSaveTeamMember(this.state.team.id, teamMember, this.state.teamMemberImgFile, (response: any) => {
+    //                 AlertComponent({title: "Saved Successful", message: "Saved Member Successfully"});
+    //                 console.log("Response apiSaveTeam is", response);
 
-                    // Transform response data to TeamMeber
-                    // this.addMemberToTeam(response.data);
-                    this.getTeam();
-                },
-                (error: any) => {
-                    AlertComponent({title: "Error", message: "Error saving Team"});
-                    if (error.response)
-                        console.log(error.response.data);
+    //                 // Transform response data to TeamMeber
+    //                 // this.addMemberToTeam(response.data);
+    //                 this.getTeam();
+    //             },
+    //             (error: any) => {
+    //                 AlertComponent({title: "Error", message: "Error saving Team"});
+    //                 if (error.response)
+    //                     console.log(error.response.data);
 
-                    if (error.request)
-                        console.log(error.request);
+    //                 if (error.request)
+    //                     console.log(error.request);
 
-                    console.log('Error', error.message);
-                });
-        }
-    };
+    //                 console.log('Error', error.message);
+    //             });
+    //     }
+    // };
 
     render() {
         const imgSrc = this.state.teamImgFile ? this.state.teamImgFile.uri : this.state.team.emblem;
@@ -275,52 +248,53 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
                         </Block>
                         <Block row>
                             <Button onlyIcon onPress={this.addPlayer} icon="adduser" iconFamily="antdesign" iconSize={30}
-                                    color="success" iconColor="#fff" style={{ width: 40, height: 40 }}>Add</Button>
+                                color="success" iconColor="#fff" style={{ width: 40, height: 40 }}>Add</Button>
                         </Block>
                     </Block>
                     <Block row right>
                         <FlatList
-                            style={{ backgroundColor: theme.COLORS.WHITE, margin: 5, padding: 5}}
+                            style={{ backgroundColor: theme.COLORS.WHITE, margin: 5, padding: 5 }}
                             data={this.state.team.players}
-                            renderItem={({item, index}) => this.renderListItem(item, index)}
+                            renderItem={({ item, index }) => this.renderListItem(item, index)}
                         />
                     </Block>
                 </Block>
-                 <Modal
-                     animationType="slide"
-                     transparent={true}
-                     visible={this.state.modalVisible}>
-                     <Block flex style={styles.modalView}>
-                         <Block row>
-                             <ImagePickerComponent
-                                 imgURI={this.state.teamMemberImgFile ? this.state.teamMemberImgFile.uri : ''}
-                                 onSelectImg={this.updateModalImage}
-                                 defaultImg={DEFAULT_IMAGES.member}
-                             />
-                         </Block>
-                         <Block row>
-                             <Input
-                                 onChangeText={(name: string) => this.onTeamMemberChange(name, "")}
-                                 placeholder={DEFAULT_TEAM_MEMBER_NAME}
-                                 value={this.state.teamMember.name}
-                                 color={theme.COLORS.THEME}
-                                 style={{ borderColor: theme.COLORS.THEME}}
-                                 placeholderTextColor={theme.COLORS.THEME} />
-                         </Block>
-                         <Block row>
-                             <Input
-                                 onChangeText={(mobile: string) => this.onTeamMemberChange("", mobile)}
-                                 placeholder={DEFAULT_TEAM_MEMBER_MOBILE}
-                                 value={this.state.teamMember.mobile}
-                                 color={theme.COLORS.THEME}
-                                 style={{ borderColor: theme.COLORS.THEME}}
-                                 placeholderTextColor={theme.COLORS.THEME} />
-                         </Block>
-                         <Block row>
-                             <Button round size="small" color="info" onPress={this.saveMember}>Save</Button>
-                         </Block>
-                     </Block>
-                 </Modal>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={this.state.modalVisible}>
+                    <Block flex style={styles.modalView}>
+                        <Block row>
+                            <ImagePickerComponent
+                                imgURI={this.state.teamMemberImgFile ? this.state.teamMemberImgFile.uri : ''}
+                                onSelectImg={this.updateModalImage}
+                                defaultImg={DEFAULT_IMAGES.member}
+                            />
+                        </Block>
+                        <Block row>
+                            <Input
+                                onChangeText={(name: string) => this.onTeamMemberChange(name, "")}
+                                placeholder={DEFAULT_TEAM_MEMBER_NAME}
+                                value={this.state.teamMember.name}
+                                color={theme.COLORS.THEME}
+                                style={{ borderColor: theme.COLORS.THEME }}
+                                placeholderTextColor={theme.COLORS.THEME} />
+                        </Block>
+                        <Block row>
+                            <Input
+                                onChangeText={(mobile: string) => this.onTeamMemberChange("", mobile)}
+                                placeholder={DEFAULT_TEAM_MEMBER_MOBILE}
+                                value={this.state.teamMember.mobile}
+                                color={theme.COLORS.THEME}
+                                style={{ borderColor: theme.COLORS.THEME }}
+                                placeholderTextColor={theme.COLORS.THEME} />
+                        </Block>
+                        <Block row>
+                            {/* <Button round size="small" color="info" onPress={this.saveMember}>Save</Button> */}
+                            <Button round size="small" color="info" onPress={()=>(console.log("Pressed"))}>Save</Button>
+                        </Block>
+                    </Block>
+                </Modal>
             </Block>
 
         );
@@ -360,14 +334,14 @@ const styles = StyleSheet.create({
     },
     h1: {
         color: 'white',
-        textAlign:'center',
-        fontSize:20,
-        paddingBottom:8
+        textAlign: 'center',
+        fontSize: 20,
+        paddingBottom: 8
     },
     h2: {
         color: 'white',
-        textAlign:'left',
-        fontSize:18,
+        textAlign: 'left',
+        fontSize: 18,
         flex: 1
     },
     headerSection: {
@@ -380,7 +354,7 @@ const styles = StyleSheet.create({
     },
     listSection: {
         flex: 1,
-        marginTop:8,
+        marginTop: 8,
         justifyContent: 'space-between',
         alignItems: 'flex-start',
         flexWrap: 'nowrap',
@@ -390,12 +364,12 @@ const styles = StyleSheet.create({
         flex: 1,
         flexBasis: Dimensions.get('window').width / 2 - 5,
         flexGrow: 0,
-        paddingTop:2
+        paddingTop: 2
     },
     teamNameInput: {
         height: 52,
-        fontSize:30,
-        marginTop:0,
+        fontSize: 30,
+        marginTop: 0,
         borderWidth: 0,
         color: Colors.white
     },
@@ -437,9 +411,9 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5
     },
-    newPlayerInput : {
+    newPlayerInput: {
         height: 40,
-        marginTop:2,
+        marginTop: 2,
         borderWidth: 0,
         color: Colors.black
     },

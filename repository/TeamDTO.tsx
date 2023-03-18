@@ -1,4 +1,4 @@
-import {Team} from "../../../domain/Team";
+import {Team} from "../domain/Team";
 import {TeamMemberDTO} from "./TeamMemberDTO";
 
 export class TeamDTO {
