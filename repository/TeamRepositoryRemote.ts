@@ -1,7 +1,6 @@
 import AlertComponent from "../components/common/AlertComponent";
 import { Team } from "../domain/Team";
 import { apiConfig, restApiClient } from "./api";
-import { apiSaveTeam } from "./TeamApi";
 import { TeamDTO } from "./TeamDTO";
 import { TeamMemberDTO } from "./TeamMemberDTO";
 import TeamRepositoryInterface from "./TeamRepositoryInterface";
@@ -10,9 +9,13 @@ const baseURl = '/rest/teams/';
 export default class TeamRepositoryRemote implements TeamRepositoryInterface {
 
     constructor() { }
+    getTeams(): Team[]  {
+        let teamResponse: Team = new Team("", "");
+        return [teamResponse]
+    }
 
-    getTeam = (teamId: Number) => {
-        let team: Team = new Team(null, null, null);
+    getTeam = (teamId: string) : Team => {
+        let teamResponse: Team = new Team("", "");
         restApiClient.get(`${baseURl}${teamId}`).then((resp: { data: any; }) => {
             if (resp.data) {
                 const teamDTO = resp.data;
@@ -30,32 +33,32 @@ export default class TeamRepositoryRemote implements TeamRepositoryInterface {
                     return member;
                 });
 
-                team = response.toTeam();
+                teamResponse = response.toTeam();
             }
         }).catch((error: any) => {
             console.error("getTeam", error)
         });
 
-        return team;
+        return teamResponse;
     }
 
     saveTeam = (team: Team) => {
         const teamDTO = new TeamDTO(team.id, team.name, "");
 
-        apiSaveTeam(teamDTO, team.emblem, (response: any) => {
-            AlertComponent({ title: "Saved Successful", message: "Saved Team Successfully" });
-            console.log("Response apiSaveTeam is", response);
-        },
-            (error: any) => {
-                AlertComponent({ title: "Error", message: "Error saving Team" });
-                if (error.response)
-                    console.log(error.response.data);
+        // apiSaveTeam(teamDTO, team.emblem, (response: any) => {
+        //     AlertComponent({ title: "Saved Successful", message: "Saved Team Successfully" });
+        //     console.log("Response apiSaveTeam is", response);
+        // },
+        //     (error: any) => {
+        //         AlertComponent({ title: "Error", message: "Error saving Team" });
+        //         if (error.response)
+        //             console.log(error.response.data);
 
-                if (error.request)
-                    console.log(error.request);
+        //         if (error.request)
+        //             console.log(error.request);
 
-                console.log('Error', error.message);
-            });
+        //         console.log('Error', error.message);
+        //     });
     }
 
     //     apiCreateTeam = (body, emblem, onSuccess, onError) => {

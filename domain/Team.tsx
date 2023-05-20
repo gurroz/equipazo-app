@@ -1,17 +1,33 @@
 import {TeamMember} from "./TeamMember";
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 
 export class Team {
-    id: number;
-    name: string;
-    emblem: string;
-    coaches: TeamMember[];
-    players: TeamMember[]
+    id: string = '';
+    name: string = '';
+    emblem: string = '';
+    coaches: TeamMember[] = [];
+    players: TeamMember[] = []
 
-    constructor(name: string, id: number, emblem: string) {
-        this.name = name;
-        this.id = id;
-        this.emblem = emblem;
-        this.coaches = [];
-        this.players = [];
+    public static emptyTeam() {
+        return new Team();
+    }
+
+    public static newTeam(name: string, emblem: string) {
+        const team = new Team();
+        team.id = uuidv4();
+        team.name = name;
+        team.emblem = emblem;
+
+        return team;
+    }
+
+    public static newTeamWithId(id: string, name: string, emblem: string) {
+        const team = new Team();
+        team.id = id;
+        team.name = name;
+        team.emblem = emblem;
+
+        return team;
     }
 }

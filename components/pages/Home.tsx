@@ -1,31 +1,32 @@
-import {Dimensions, ScrollView, StyleSheet} from "react-native";
-import React, {Component} from "react";
-import {Block, Button, Card, Input} from 'galio-framework';
-import {apiAllGetTeams, apiCreateTeam} from "../../repository/TeamApi";
-import {TeamDTO} from "../../repository/TeamDTO";
-import AlertComponent from "../common/AlertComponent";
-import {HomeProps} from "../app/Router";
-import {Team} from "../../domain/Team";
+import { Block, Button, Card, Input } from 'galio-framework';
+import React, { Component } from "react";
+import { Dimensions, ScrollView, StyleSheet } from "react-native";
+import { Team } from "../../domain/Team";
+import TeamRepository from '../../repository/TeamRepository';
+import { DEFAULT_IMAGES } from "../app/images";
+import { HomeProps } from "../app/Router";
 import theme from '../app/theme';
+import AlertComponent from "../common/AlertComponent";
 import ImagePickerComponent from "../common/ImagePickerComponent";
-import {DEFAULT_IMAGES} from "../app/images";
 
 
 type HomeState = {
-    currentTeamImage: any
-    , currentTeamName: string
+    newTeamImage: any
+    , newTeamName: string
     , teams: any
 }
 
 const DEFAULT_NAME = "My Team";
 
 export class Home extends Component<HomeProps, HomeState> {
+    private repository: TeamRepository;
+
     constructor(props: HomeProps) {
         super(props);
-
+        this.repository = TeamRepository.getInstance();
         this.state = {
-            currentTeamImage: null
-            , currentTeamName: ""
+            newTeamImage: null
+            , newTeamName: ""
             , teams: []
         };
     }
@@ -35,57 +36,31 @@ export class Home extends Component<HomeProps, HomeState> {
     }
 
     saveTeam = () => {
-        const teamDTO = new TeamDTO(0, this.state.currentTeamName, "");
-        apiCreateTeam(teamDTO, this.state.currentTeamImage, (response: any) => {
-                AlertComponent({title: "Saved Successful", message:"Saved Team Successfully"});
-                console.log("Response apiCreateTeam is", response);
-                this.getTeams();
-            },
-            (error: any) => {
-                AlertComponent({title: "Error", message:"Error saving Team"});
-                if(error.response)
-                    console.log(error.response.data);
-
-                if(error.request)
-                    console.log(error.request);
-
-                console.log('Error', error.message);
-            });
+        const teamDTO = Team.newTeam(this.state.newTeamName, this.state.newTeamImage);
+        this.repository.saveTeam(teamDTO);
+        this.getTeams()
+        AlertComponent({title: "Saved Successful", message:"Saved Team Successfully"});
     }
 
     getTeams = () => {
-        console.log("Calling getTeam");
-        apiAllGetTeams((response: any) => {
-                console.log("Response getTeams is", response);
-                const teams = response.map( (teamDTO: TeamDTO) => {
-                    const team = teamDTO.toTeam();
-                    console.log("Team is", team);
-                    return team;
-                })
-                this.setState({teams: teams, currentTeamImage: null, currentTeamName: ""})
-            },
-            (error: any) => {
-                AlertComponent({title: "Error", message:"Error getting Teams"});
-                if(error.response)
-                    console.log(error.response.data);
+        const teams = this.repository.getTeams();
+        console.log("Calling getTeam", teams);
 
-                if(error.request)
-                    console.log(error.request);
-
-                console.log('Error', error.message);
-            });
+        this.setState({teams: teams, newTeamImage: null, newTeamName: ""})
     }
 
-    teamDetail = (teamId: number) => {
+    teamDetail = (teamId: string) => {
+        console.log("Calling teamDetail", teamId);
         this.props.navigation.navigate('MyTeam', {teamId})
     }
 
     updateImage= (img: any) => {
-        this.setState({currentTeamImage: img});
+        this.setState({newTeamImage: img});
     };
 
     render() {
-        const imgSrc = this.state.currentTeamImage ? this.state.currentTeamImage.uri : '';
+        console.log("Teams are", this.state.teams)
+        const imgSrc = this.state.newTeamImage ? this.state.newTeamImage : '';
         return (
             <ScrollView contentContainerStyle={styles.cards}>
             <Block flex space="between">
@@ -104,9 +79,9 @@ export class Home extends Component<HomeProps, HomeState> {
                         defaultImg={DEFAULT_IMAGES.team}
                     />
                     <Input
-                        onChangeText={(text: string) => this.setState({currentTeamName: text})}
+                        onChangeText={(text: string) => this.setState({newTeamName: text})}
                         placeholder={DEFAULT_NAME}
-                        value={this.state.currentTeamName}
+                        value={this.state.newTeamName}
                         color={theme.COLORS.THEME}
                         style={{ borderColor: theme.COLORS.THEME}}
                         placeholderTextColor={theme.COLORS.THEME} />
@@ -124,7 +99,7 @@ export class Home extends Component<HomeProps, HomeState> {
                                 borderless
                                 style={styles.card}
                                 title={team.name}
-                                caption={`${team.players ? team.players.length : 0} players`}
+                                caption={`id: ${team.id} name: ${team.name}: ${team.players ? team.players.length : 0} players`}
                                 image={team.emblem}
                                 imageStyle={styles.rounded}
                                 shadowColor={theme.COLORS.BLACK}

@@ -9,7 +9,11 @@ export default class TeamRepositoryLocal implements TeamRepositoryInterface {
         this.localDao = new TeamLocalDAO();
     }
 
-    getTeam(teamId: Number) {
+    getTeams(): Team[]  {
+        return this.localDao.getTeams()
+    }
+
+    getTeam(teamId: string): Team  {
         return this.localDao.getTeam(teamId) 
     }
 

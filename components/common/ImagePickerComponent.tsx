@@ -1,5 +1,5 @@
 import {Image, StyleSheet, TouchableHighlight} from "react-native";
-import ImagePicker from "react-native-image-picker";
+import {launchImageLibrary, MediaType} from "react-native-image-picker";
 import React from "react";
 
 interface Props {
@@ -12,24 +12,20 @@ interface Props {
 export default function ImagePickerComponent(props: Props) {
 
     const chooseImage = () => {
+        const type: MediaType = 'photo';
         let options = {
-            title: 'Select Image',
-            storageOptions: {
-                skipBackup: true,
-                path: 'images',
-                maxWidth: '600',
-                maxHeight: '800'
-            },
+            mediaType: type,
+            maxWidth: 600,
+            maxHeight: 800
         };
-        ImagePicker.showImagePicker(options, (response) => {
+
+        launchImageLibrary(options,  (response) => {
             if (response.didCancel) {
                 console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-            } else {
-                props.onSelectImg(response);
+            } else if (response.errorCode) {
+                console.log('ImagePicker Error: ', response.errorMessage);
+            } else if(response.assets){
+                props.onSelectImg(response.assets[0].uri);
             }
         });
     }

@@ -2,8 +2,8 @@ import {DrawerScreenProps} from "@react-navigation/drawer";
 
 type RootDrawerProps = {
     Home: undefined;
-    MyTeam: { teamId: number };
-    Formations: { teamId: number};
+    MyTeam: { teamId: string };
+    Formations: { teamId: string};
 };
 
 type HomeProps = DrawerScreenProps<RootDrawerProps, 'Home'>;

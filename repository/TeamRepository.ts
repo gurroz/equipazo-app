@@ -22,10 +22,16 @@ export default class TeamRepository {
         return TeamRepository.instance;
     }
 
-    public getTeam(teamId: Number): Team {
+    public getTeam(teamId: string): Team {
         const isOnline: boolean = this.getNetworkStatus();
         const repo: TeamRepositoryInterface = this.repositories.get(isOnline)!;
         return repo.getTeam(teamId);
+    }
+
+    public getTeams(): Team[] {
+        const isOnline: boolean = this.getNetworkStatus();
+        const repo: TeamRepositoryInterface = this.repositories.get(isOnline)!;
+        return repo.getTeams();
     }
 
     public saveTeam(team: Team): void {

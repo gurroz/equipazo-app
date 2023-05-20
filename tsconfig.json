@@ -1,5 +1,4 @@
 {
-<<<<<<< ours
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
@@ -21,7 +20,3 @@
     "jest.config.js"
   ]
 }
-=======
-  "extends": "@tsconfig/react-native/tsconfig.json"
-}
->>>>>>> theirs

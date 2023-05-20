@@ -31,7 +31,9 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
     constructor(props: MyTeamProps) {
         super(props);
 
-        const team = new Team("", props.route.params.teamId, "");
+        console.log("CREATING MyTeam", props.route.params.teamId)
+        const team = Team.emptyTeam()
+        team.id = props.route.params.teamId
         this.teamRepo = TeamRepository.getInstance();
 
         this.state = {
@@ -73,8 +75,9 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
     }
 
     getTeam = () => {
-        console.log("Calling getTeam");
+        console.log("Calling getTeam with id", this.state.team.id);
         const team = this.teamRepo.getTeam(this.state.team.id);
+        console.log("response getTeam", team);
 
         this.setState({ team: team, modalVisible: false, teamMemberImgFile: null, teamMember: this.defaultTeamMember(), isDirty: false });
     }
@@ -225,7 +228,8 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
     // };
 
     render() {
-        const imgSrc = this.state.teamImgFile ? this.state.teamImgFile.uri : this.state.team.emblem;
+        console.log("Details:", this.state.team)
+        const imgSrc = this.state.teamImgFile ? this.state.teamImgFile : this.state.team.emblem;
         const teamName = this.state.team.name || '';
         return (
             <Block safe flex>

@@ -2,6 +2,7 @@ import { Team } from "../domain/Team";
 
 export default interface TeamRepositoryInterface {
 
-    getTeam: (teamId: Number) => Team; 
+    getTeam: (teamId: string) => Team;
+    getTeams: () => Team[];  
     saveTeam: (team: Team) => void;
 }
