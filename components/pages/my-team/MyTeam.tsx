@@ -14,8 +14,7 @@ import ImagePickerComponent from "../../common/ImagePickerComponent";
 
 
 type MyClubState = {
-    teamImgFile: any
-    , team: Team
+    team: Team
     , teamMemberImgFile: any
     , teamMember: TeamMember
     , modalVisible: boolean
@@ -38,7 +37,6 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
 
         this.state = {
             team: team
-            , teamImgFile: null
             , teamMemberImgFile: null
             , teamMember: this.defaultTeamMember()
             , modalVisible: false
@@ -55,7 +53,7 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
         if (this.state.isDirty) {
             if (prevState.team
                 && (prevState.team.name != this.state.team.name
-                    || prevState.teamImgFile != this.state.teamImgFile)) {
+                    || prevState.team.emblem != this.state.team.emblem)) {
                 this.synchronizeTeam();
             } else if (prevState.team
                 && !isEqual(prevState.team.coaches, this.state.team.coaches)) {
@@ -83,7 +81,10 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
     }
 
     updateImage = (img: any) => {
-        this.setState({ teamImgFile: img, isDirty: true });
+        const updatedTeam = Team.copy(this.state.team)
+        updatedTeam.emblem = img
+
+        this.setState({ team: updatedTeam, isDirty: true });
     };
 
     updateModalImage = (img: any) => {
@@ -98,7 +99,6 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
     }
 
     renderListItem = (item: TeamMember, index: number) => {
-        console.log("Rendering TeamMember", item);
         return <Block flex id={`id-${item.name}`} key={`key-${item.name}`}>
             <Block row>
 
@@ -121,9 +121,6 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
                 <Block>
                     <Text style={styles.listItem}>{item.name}</Text>
                 </Block>
-                <Block right>
-                    <Text muted style={styles.listItem}>{item.mobile}</Text>
-                </Block>
             </Block>
         </Block>
     }
@@ -142,6 +139,7 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
         console.log("Synchronising players");
         this.setState({ teamMemberImgFile: null });
     }
+
 
     onTeamNameChange = (newName: string) => {
         console.log("Updating name", newName, this.state.team);
@@ -180,62 +178,47 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
         return isEqual(listType, COACH);
     }
 
-    addMemberToTeam = (teamMember: TeamMember) => {
-        const team = Object.assign({}, this.state.team);
-        let currentMembers = [];
-        if (this.isMemberCoaches()) {
-            currentMembers = Object.assign([], this.state.team.coaches);
-            currentMembers.push(teamMember)
-            console.log("Updated members", currentMembers);
+    addMemberToTeam = (teamMember: TeamMember) => { 
+        console.debug("addMemberToTeam", teamMember);
+        let team = this.state.team;
+        console.debug("addMemberToTeam 222", team);
 
-            team.coaches = currentMembers;
-        } else {
-            currentMembers = Object.assign([], this.state.team.players);
-            currentMembers.push(teamMember);
-            console.log("Updated members", currentMembers);
+        const hasAddedPlayer = team.addPlayer(teamMember);
+        console.debug("addMemberToTeam 33");
 
-            team.players = currentMembers;
+        if(!hasAddedPlayer) {
+            throw new Error("Team Member alresy exist with that name");
         }
+        console.debug("addMemberToTeam 44");
 
-
-        this.setState({ team: team, modalVisible: false, teamMember: this.defaultTeamMember(), isDirty: false });
+        return team;
     }
 
-    // saveMember = () => {
-    //     const teamMember =  TeamMemberDTO.fromTeamMember(this.state.teamMember);
-    //     teamMember.type  = this.state.modalType;
+    saveMember = () => {
+        try {            
+            console.debug("saveMember1");
+            const teamMember: TeamMember = TeamMember.copy(this.state.teamMember);
+            teamMember.picture = this.state.teamMemberImgFile;
 
-    //     if(teamMember.isValid()) {
-    //         apiSaveTeamMember(this.state.team.id, teamMember, this.state.teamMemberImgFile, (response: any) => {
-    //                 AlertComponent({title: "Saved Successful", message: "Saved Member Successfully"});
-    //                 console.log("Response apiSaveTeam is", response);
+            const team: Team = this.addMemberToTeam(teamMember);
+            console.debug("saveMember2", team);
 
-    //                 // Transform response data to TeamMeber
-    //                 // this.addMemberToTeam(response.data);
-    //                 this.getTeam();
-    //             },
-    //             (error: any) => {
-    //                 AlertComponent({title: "Error", message: "Error saving Team"});
-    //                 if (error.response)
-    //                     console.log(error.response.data);
+            this.teamRepo.saveTeam(team);
+            this.setState({ team: team, modalVisible: false, teamMember: this.defaultTeamMember(), isDirty: false });
+            AlertComponent({title: "Saved Successful", message:"Saved Team Successfully"});
+        } catch(e) {
+            console.warn("Error saving teamMember", e);
+            AlertComponent({title: "Error", message: "Cannot Save Team Member. Please check the name is unique"});
+        }
 
-    //                 if (error.request)
-    //                     console.log(error.request);
-
-    //                 console.log('Error', error.message);
-    //             });
-    //     }
-    // };
+    };
 
     render() {
-        console.log("Details:", this.state.team)
-        const imgSrc = this.state.teamImgFile ? this.state.teamImgFile : this.state.team.emblem;
-        const teamName = this.state.team.name || '';
         return (
-            <Block safe flex>
+            <Block style={styles.root} safe flex>
                 <Block style={styles.emblemHolder}>
                     <ImagePickerComponent
-                        imgURI={imgSrc}
+                        imgURI={this.state.team.emblem}
                         onSelectImg={this.updateImage}
                         defaultImg={DEFAULT_IMAGES.team}
                         style={styles.emblemImage}
@@ -243,7 +226,7 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
                 </Block>
 
                 <Block center={true}>
-                    <Text h2>{teamName}</Text>
+                    <Text h2>{this.state.team.name}</Text>
                 </Block>
                 <Block>
                     <Block row>
@@ -263,6 +246,9 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
                         />
                     </Block>
                 </Block>
+
+
+                
                 <Modal
                     animationType="slide"
                     transparent={true}
@@ -270,7 +256,7 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
                     <Block flex style={styles.modalView}>
                         <Block row>
                             <ImagePickerComponent
-                                imgURI={this.state.teamMemberImgFile ? this.state.teamMemberImgFile.uri : ''}
+                                imgURI={this.state.teamMemberImgFile ? this.state.teamMemberImgFile : ''}
                                 onSelectImg={this.updateModalImage}
                                 defaultImg={DEFAULT_IMAGES.member}
                             />
@@ -294,8 +280,7 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
                                 placeholderTextColor={theme.COLORS.THEME} />
                         </Block>
                         <Block row>
-                            {/* <Button round size="small" color="info" onPress={this.saveMember}>Save</Button> */}
-                            <Button round size="small" color="info" onPress={()=>(console.log("Pressed"))}>Save</Button>
+                            <Button round size="small" color="info" onPress={this.saveMember}>Save</Button>
                         </Block>
                     </Block>
                 </Modal>
@@ -306,6 +291,9 @@ export class MyTeam extends Component<MyTeamProps, MyClubState> {
 }
 
 const styles = StyleSheet.create({
+    root: {
+        // backgroundColor: 'black',
+    },
     article: {
         marginTop: theme.SIZES.BASE * 1.75,
     },
