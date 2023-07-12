@@ -44,7 +44,7 @@ export class Team {
     static fromJSON(json: Object): Team {
         const plainTeam : Team = Object.assign(Team.emptyTeam(), json);
         const realTem : Team = Team.copy(plainTeam);
-        return  realTem
+        return realTem
     }
 
     addPlayer(player: TeamMember) : boolean {
@@ -57,5 +57,4 @@ export class Team {
 
         return response;
     }
-    
 }

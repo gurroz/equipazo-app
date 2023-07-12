@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@react-native-community/masked-view": "^0.1.11",
@@ -21,12 +22,14 @@
     "lodash.isequal": "^4.5.0",
     "react": "18.2.0",
     "react-native": "0.71.7",
+    "react-native-contacts": "^7.0.5",
     "react-native-draggable": "^3.3.0",
     "react-native-eject": "^0.2.0",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-get-random-values": "^1.9.0",
     "react-native-image-picker": "^5.3.1",
     "react-native-mmkv": "^2.8.0",
+    "react-native-paper": "^5.8.0",
     "react-native-reanimated": "^3.1.0",
     "react-native-safe-area-context": "^3.0.7",
     "react-native-screens": "^2.18.1",
