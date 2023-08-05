@@ -1,21 +1,24 @@
 import {DrawerScreenProps} from "@react-navigation/drawer";
 
 type RootDrawerProps = {
-    Home: undefined;
-    MyTeam: { teamId: string, contactsImported?: number};
+    MyTeams: undefined;
+    TeamProfile: { teamId: string, contactsImported?: number};
+    TeamMemberProfile: { teamId: string, teamMemberId?: string};
     Formations: { teamId: string};
     ImportContacts: { teamId: string};
 };
 
-type HomeProps = DrawerScreenProps<RootDrawerProps, 'Home'>;
-type MyTeamProps = DrawerScreenProps<RootDrawerProps, 'MyTeam'>;
+type MyTeamsProps = DrawerScreenProps<RootDrawerProps, 'MyTeams'>;
+type TeamProfileProps = DrawerScreenProps<RootDrawerProps, 'TeamProfile'>;
 type ImportContactsProps = DrawerScreenProps<RootDrawerProps, 'ImportContacts'>;
 type FormationsProps = DrawerScreenProps<RootDrawerProps, 'Formations'>;
+type TeamMemberProfileProps = DrawerScreenProps<RootDrawerProps, 'TeamMemberProfile'>;
 
 
 export type {
-    HomeProps
-    , MyTeamProps
+    MyTeamsProps
+    , TeamProfileProps
     , FormationsProps
     , ImportContactsProps
+    , TeamMemberProfileProps
 };

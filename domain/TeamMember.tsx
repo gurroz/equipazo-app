@@ -1,23 +1,48 @@
 import { v4 as uuidv4 } from 'uuid';
 
-
+export type POSITIONS = 'GK' | 'LB' | 'CB' | 'RB' | 'DM' | 'CM' | 'AM' | 'LW' | 'CF' | 'RW'
 export class TeamMember {
-    id: string;
-    name: string;
-    picture: string;
-    mobile: string;
-    synchronized: boolean;
+    id: string = '';
+    name: string = '';
+    picture: string = '';
+    mobile: string = '';
+    isPlayer: boolean = false;
+    isCoach: boolean = false;
+    positions: POSITIONS[] = [];
 
-    constructor(name: string, picture: string, mobile: string) {
-        this.id = uuidv4();
-        this.name = name;
-        this.mobile = mobile;
-        this.picture = picture;
-        this.synchronized = true;
+    constructor() {}
+
+    static emptyTeamMember() {
+        return new TeamMember();
     }
 
-    static copy(oldTeamMember: TeamMember) {
-        const teamMember = new TeamMember(oldTeamMember.name, oldTeamMember.picture, oldTeamMember.mobile);
-        return teamMember
+    static copy(teamMember: TeamMember) {
+        const copyTeamMember = new TeamMember();
+        copyTeamMember.id = teamMember.id;
+        copyTeamMember.name = teamMember.name;
+        copyTeamMember.mobile = teamMember.mobile;
+        copyTeamMember.picture = teamMember.picture;
+        copyTeamMember.isPlayer = teamMember.isPlayer;
+        copyTeamMember.isCoach = teamMember.isCoach;
+        copyTeamMember.positions = Object.assign([], teamMember.positions);
+
+        return copyTeamMember;
+    }
+
+    static newTeamMember(teamMember: TeamMember) {
+        const copyTeamMember = TeamMember.copy(teamMember);
+        copyTeamMember.id = uuidv4();
+
+        return copyTeamMember;
+    }
+
+    static newTeamMemberWithId(name: string, mobile: string, picture: string) {
+        const newTeamMember = TeamMember.emptyTeamMember();
+        newTeamMember.id = uuidv4();
+        newTeamMember.name = name;
+        newTeamMember.mobile = mobile;
+        newTeamMember.picture = picture;
+
+        return newTeamMember;
     }
 }

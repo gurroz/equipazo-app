@@ -17,8 +17,7 @@ export default class TeamLocalDAO {
         return Team.fromJSON(JSON.parse(this.storage.getString(id)))
       })
     } else {
-      let teamResponse: Team = Team.emptyTeam();
-      return [teamResponse]
+      return []
     }
   }
 

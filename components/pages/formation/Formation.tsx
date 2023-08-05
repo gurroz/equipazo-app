@@ -1,4 +1,3 @@
-import { Block } from "galio-framework";
 import React, { Component } from "react";
 import { ImageBackground, StyleSheet } from "react-native";
 import { FIELD_BK } from "../../../assets/images";
@@ -8,9 +7,9 @@ import { FormationsProps } from "../../app/Router";
 import DragableCircularButton from "../../common/DragableCircularButton";
 
 type FormationState = {
-    team : Team
+    team: Team
     , modalVisible: boolean
-    , modalType : string
+    , modalType: string
     , isDirty: boolean
 }
 
@@ -22,7 +21,7 @@ export class Formation extends Component<FormationsProps, FormationState> {
         this.repository = TeamRepository.getInstance();
 
         this.state = {
-            team: new Team("","")
+            team: new Team()
             , modalVisible: false
             , modalType: ''
             , isDirty: false
@@ -34,23 +33,25 @@ export class Formation extends Component<FormationsProps, FormationState> {
     }
 
     // Todo: get team formation
-    getTeam = (id:string) => {
+    getTeam = (id: string) => {
         console.log("Calling getTeam");
         const team = this.repository.getTeam(id);
-        this.setState({team: team, modalVisible: false, isDirty:false});
+        this.setState({ team: team, modalVisible: false, isDirty: false });
     }
 
+    //TODO: Add right list with players
+    //TODO: Show dragrables from team
+    //TODO: Make swap omnn clik
     render() {
         return (
-            <Block safe>
             <ImageBackground source={FIELD_BK} style={styles.image}>
                 {this.state.team.players
                     && this.state.team.players.map((player, index) => {
-                        return <DragableCircularButton name={player.name} onShortPress={ () => console.log("WEENA")}/>
+                        return <DragableCircularButton name={player.name} onShortPress={() => console.log("WEENA")} />
                     })
                 }
             </ImageBackground>
-        </Block>)
+        )
     }
 }
 

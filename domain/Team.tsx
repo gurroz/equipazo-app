@@ -6,10 +6,9 @@ export class Team {
     id: string = '';
     name: string = '';
     emblem: string = '';
-    coaches: TeamMember[] = [];
-    players: TeamMember[] = [];
+    members: TeamMember[] = [];
 
-    constructor() {}
+    constructor() { }
 
     static emptyTeam() {
         return new Team();
@@ -35,26 +34,48 @@ export class Team {
 
     static copy(oldTeam: Team) {
         const team = Team.newTeamWithId(oldTeam.id, oldTeam.name, oldTeam.emblem);
-        team.coaches = oldTeam.coaches
-        team.players = oldTeam.players
+        team.members = oldTeam.members
 
         return team
     }
 
     static fromJSON(json: Object): Team {
-        const plainTeam : Team = Object.assign(Team.emptyTeam(), json);
-        const realTem : Team = Team.copy(plainTeam);
+        const plainTeam: Team = Object.assign(Team.emptyTeam(), json);
+        const realTem: Team = Team.copy(plainTeam);
         return realTem
     }
 
-    addPlayer(player: TeamMember) : boolean {
+    addPlayer(player: TeamMember): boolean {
+        this.members = this.members.filter(member => member.id !== player.id)
         let response = false
-        const playerNoExists : boolean = this.players.filter(member => member.name === player.name).length === 0
+        const playerNoExists: boolean = this.members.filter(member => member.name === player.name).length === 0
         if (playerNoExists) {
-            this.players.push(player);
+            this.members.push(player);
             response = true;
         }
 
         return response;
+    }
+
+    getTeamMember(memberId: string): TeamMember {
+        const player: TeamMember = this.members.filter(member => member.id === memberId)[0]
+        if (player) {
+            return player
+        }
+
+        return TeamMember.emptyTeamMember();
+    }
+
+    getTeamMembers(): TeamMember[] {
+        return this.members ? this.members.sort((m1, m2) => {
+            if (m1.name < m2.name) {
+                return -1;
+            }
+            if (m1.name > m2.name) {
+                return 1;
+            }
+
+            return 0;
+        }) : []
     }
 }

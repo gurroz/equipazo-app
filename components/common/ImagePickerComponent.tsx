@@ -1,6 +1,6 @@
-import {Image, StyleSheet, TouchableHighlight} from "react-native";
-import {launchImageLibrary, MediaType} from "react-native-image-picker";
 import React from "react";
+import { Image, StyleSheet, TouchableHighlight } from "react-native";
+import { MediaType, launchImageLibrary } from "react-native-image-picker";
 
 interface Props {
     imgURI: any
@@ -19,12 +19,12 @@ export default function ImagePickerComponent(props: Props) {
             maxHeight: 800
         };
 
-        launchImageLibrary(options,  (response) => {
+        launchImageLibrary(options, (response) => {
             if (response.didCancel) {
                 console.log('User cancelled image picker');
             } else if (response.errorCode) {
                 console.log('ImagePicker Error: ', response.errorMessage);
-            } else if(response.assets){
+            } else if (response.assets) {
                 props.onSelectImg(response.assets[0].uri);
             }
         });
@@ -32,9 +32,9 @@ export default function ImagePickerComponent(props: Props) {
 
     const renderFileUri = () => {
         if (props.imgURI) {
-            return <Image source={{ uri: props.imgURI, headers: {Pragma: 'no-cache'}}} style={props.style || styles.images}/>
+            return <Image source={{ uri: props.imgURI, headers: { Pragma: 'no-cache' } }} style={props.style || styles.images} />
         } else {
-            return <Image source={props.defaultImg} style={props.style || styles.images}/>
+            return <Image source={props.defaultImg} style={props.style || styles.images} />
         }
     }
 
@@ -46,9 +46,8 @@ export default function ImagePickerComponent(props: Props) {
 
 const styles = StyleSheet.create({
     images: {
-        width: 150,
-        height: 150,
+        width: 100,
+        height: 100,
         borderWidth: 0,
-        marginHorizontal: 3
     }
 });

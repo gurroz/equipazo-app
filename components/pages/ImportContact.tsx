@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import { PermissionsAndroid, ScrollView, StyleSheet, View } from "react-native";
+import { FlatList, ListRenderItem, PermissionsAndroid, StyleSheet, View } from "react-native";
 import Contacts from 'react-native-contacts';
-import { Button, List, Searchbar, Surface } from 'react-native-paper';
+import { Button, Searchbar } from 'react-native-paper';
 import { Team } from "../../domain/Team";
+import { TeamMember } from "../../domain/TeamMember";
 import TeamRepository from "../../repository/TeamRepository";
 import { ImportContactsProps } from "../app/Router";
-import { TeamMember } from "../../domain/TeamMember";
-import TeamMemberList from "../common/TeamMemberList";
+import TeamMemberList from "../common/TeamMemberListItem";
 
 type ImportContactsState = {
     contacts: Array<ContactTeamMember>
@@ -60,9 +60,9 @@ export class ImportContact extends Component<ImportContactsProps, ImportContacts
             Contacts.getAll()
                 .then((contacts) => {
                     const filteredContacts = contacts.map(contact => {
-                        const mobile = contact.phoneNumbers && contact.phoneNumbers.length > 0? contact.phoneNumbers[0].number.replace(" ","").trim() : ""
+                        const mobile = contact.phoneNumbers && contact.phoneNumbers.length > 0 ? contact.phoneNumbers[0].number.replace(" ", "").trim() : ""
                         return {
-                            teamMember: new TeamMember(contact.displayName, contact.thumbnailPath, mobile),
+                            teamMember: TeamMember.newTeamMemberWithId(contact.displayName, mobile, contact.thumbnailPath),
                             selected: false
                         }
                     })
@@ -86,20 +86,19 @@ export class ImportContact extends Component<ImportContactsProps, ImportContacts
         this.setState({ contacts: filteredContacts })
     }
 
-    renderContactDetail = () => {
+    renderContactDetail: ListRenderItem<ContactTeamMember> = ({ item }) => (
+        <TeamMemberList key={item.teamMember.id} member={item.teamMember} isSelected={item.selected} onSelect={this.onSelectContact} />
+    );
+      
+    getContactList = () => {
         if (this.state.contacts) {
             const filterValue = this.state.query ? this.state.query.toLowerCase() : ""
             return this.state.contacts
                 .filter((contact: ContactTeamMember) => contact.teamMember.name.toLowerCase().includes(filterValue))
-                .map((contact: ContactTeamMember) => {
-                    return (
-                        <TeamMemberList key={contact.teamMember.id} member={contact.teamMember} isSelected={contact.selected} onSelect={this.onSelectContact}/>
-                    )
-                })
-        } else {
-            return (<></>)
-        }
 
+        } else {
+            return []
+        }
     }
 
     onChangeSearch = (query: string) => {
@@ -109,13 +108,13 @@ export class ImportContact extends Component<ImportContactsProps, ImportContacts
     importContact = () => {
         const team: Team = this.state.team;
         this.state.contacts.forEach((contact: ContactTeamMember) => {
-            if(contact.selected) {
+            if (contact.selected) {
                 team.addPlayer(contact.teamMember)
             }
         });
 
         this.teamRepo.saveTeam(team)
-        this.props.navigation.navigate('MyTeam', {teamId: team.id, contactsImported: new Date().getTime() });
+        this.props.navigation.navigate('TeamProfile', { teamId: team.id, contactsImported: new Date().getTime() });
     }
 
     render() {
@@ -125,13 +124,19 @@ export class ImportContact extends Component<ImportContactsProps, ImportContacts
                     placeholder="Search"
                     onChangeText={this.onChangeSearch}
                     value={this.state.query}
+                    showDivider={true}
+                    mode='view'
+                    style={styles.search}
+                />
+                <FlatList
+                    data={this.getContactList()}
+                    renderItem={this.renderContactDetail}
+                    keyExtractor={contact => contact.teamMember.id}
+                    style={styles.list} 
                 />
                 <Button icon="camera" mode="contained" onPress={this.importContact}>
                     Import
                 </Button>
-                <ScrollView>
-                    {this.renderContactDetail()}
-                </ScrollView>
             </View>
         );
     }
@@ -141,15 +146,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        paddingTop: 20,
-        backgroundColor: '#ecf0f1',
-        padding: 8,
+        margin: 5
     },
-    paragraph: {
-        margin: 24,
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center',
+    list: {
+        margin: 5
     },
+    search: {
+        marginTop: -5
+    }
 
 });
