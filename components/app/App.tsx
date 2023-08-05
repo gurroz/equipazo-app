@@ -1,7 +1,7 @@
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
 import 'react-native-gesture-handler';
+import { NavigationContainer } from "@react-navigation/native";
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import React from 'react';
 import { MD3LightTheme as DefaultTheme, PaperProvider } from 'react-native-paper';
 import { MyTeams } from "../pages/MyTeams";
 import { ImportContact } from '../pages/ImportContact';
@@ -18,18 +18,18 @@ const theme = {
     },
 };
 
-const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 export default function App() {
     return (
         <PaperProvider theme={theme}>
             <NavigationContainer>
-                <Stack.Navigator initialRouteName="MyTeams">
-                    <Stack.Screen name="MyTeams" component={MyTeams} options={{ title: 'MyTeams' }} />
-                    <Stack.Screen name="TeamProfile" component={TeamProfile} options={{ title: 'My Team' }} />
-                    <Stack.Screen name="Formations" component={Formation} options={{ title: 'Formations' }} />
-                    <Stack.Screen name="ImportContacts" component={ImportContact} options={{ title: 'Import Contacts' }} />
-                    <Stack.Screen name="TeamMemberProfile" component={TeamMemberProfile} options={{ title: 'Team Member Profile' }} />
-                </Stack.Navigator>
+                <Drawer.Navigator initialRouteName="MyTeams">
+                    <Drawer.Screen name="MyTeams" component={MyTeams} options={{ title: 'MyTeams' }} />
+                    <Drawer.Screen name="TeamProfile" component={TeamProfile} options={{ title: 'My Team' }} />
+                    <Drawer.Screen name="Formations" component={Formation} options={{ title: 'Formations' }} />
+                    <Drawer.Screen name="ImportContacts" component={ImportContact} options={{ title: 'Import Contacts' }} />
+                    <Drawer.Screen name="TeamMemberProfile" component={TeamMemberProfile} options={{ title: 'Team Member Profile' }} />
+                </Drawer.Navigator>
             </NavigationContainer>
         </PaperProvider>
 
