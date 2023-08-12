@@ -1,6 +1,6 @@
-import {Image, StyleSheet, TouchableHighlight} from "react-native";
-import ImagePicker from "react-native-image-picker";
 import React from "react";
+import { Image, StyleSheet, TouchableHighlight } from "react-native";
+import { MediaType, launchImageLibrary } from "react-native-image-picker";
 
 interface Props {
     imgURI: any
@@ -12,33 +12,29 @@ interface Props {
 export default function ImagePickerComponent(props: Props) {
 
     const chooseImage = () => {
+        const type: MediaType = 'photo';
         let options = {
-            title: 'Select Image',
-            storageOptions: {
-                skipBackup: true,
-                path: 'images',
-                maxWidth: '600',
-                maxHeight: '800'
-            },
+            mediaType: type,
+            maxWidth: 600,
+            maxHeight: 800
         };
-        ImagePicker.showImagePicker(options, (response) => {
+
+        launchImageLibrary(options, (response) => {
             if (response.didCancel) {
                 console.log('User cancelled image picker');
-            } else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            } else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-            } else {
-                props.onSelectImg(response);
+            } else if (response.errorCode) {
+                console.log('ImagePicker Error: ', response.errorMessage);
+            } else if (response.assets) {
+                props.onSelectImg(response.assets[0].uri);
             }
         });
     }
 
     const renderFileUri = () => {
         if (props.imgURI) {
-            return <Image source={{ uri: props.imgURI, headers: {Pragma: 'no-cache'}}} style={props.style || styles.images}/>
+            return <Image source={{ uri: props.imgURI, headers: { Pragma: 'no-cache' } }} style={props.style || styles.images} />
         } else {
-            return <Image source={props.defaultImg} style={props.style || styles.images}/>
+            return <Image source={props.defaultImg} style={props.style || styles.images} />
         }
     }
 
@@ -50,9 +46,8 @@ export default function ImagePickerComponent(props: Props) {
 
 const styles = StyleSheet.create({
     images: {
-        width: 150,
-        height: 150,
+        width: 100,
+        height: 100,
         borderWidth: 0,
-        marginHorizontal: 3
     }
 });

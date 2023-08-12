@@ -1,35 +1,27 @@
-import { Block } from "galio-framework";
 import React, { Component } from "react";
 import { ImageBackground, StyleSheet } from "react-native";
 import { FIELD_BK } from "../../../assets/images";
 import { Team } from "../../../domain/Team";
-import { TeamMember } from "../../../domain/TeamMember";
-import { FormationsProps, MyTeamProps } from "../../app/Router";
-import AlertComponent from "../../common/AlertComponent";
+import TeamRepository from "../../../repository/TeamRepository";
+import { FormationsProps } from "../../app/Router";
 import DragableCircularButton from "../../common/DragableCircularButton";
-import { apiGetTeam } from "../my-team/MyTeamApi";
-import { TeamDTO } from "../my-team/TeamDTO";
 
 type FormationState = {
-    teamImgFile: any
-    , team: Team
-    , teamMemberImgFile: any
-    , teamMember: TeamMember
+    team: Team
     , modalVisible: boolean
     , modalType: string
     , isDirty: boolean
 }
 
-export default class Formation extends Component<FormationsProps, FormationState> {
-    constructor(props: MyTeamProps) {
-        super(props);
+export class Formation extends Component<FormationsProps, FormationState> {
+    private repository: TeamRepository;
 
-        const team = new Team("", props.route.params.teamId, "");
+    constructor(props: FormationsProps) {
+        super(props);
+        this.repository = TeamRepository.getInstance();
+
         this.state = {
-            team: team
-            , teamImgFile: null
-            , teamMemberImgFile: null
-            , teamMember: this.defaultTeamMember()
+            team: new Team()
             , modalVisible: false
             , modalType: ''
             , isDirty: false
@@ -37,42 +29,30 @@ export default class Formation extends Component<FormationsProps, FormationState
     }
 
     componentDidMount = () => {
-        this.getTeam();
+        this.getTeam(this.props.route.params.teamId);
     }
 
     // Todo: get team formation
-    getTeam = () => {
+    getTeam = (id: string) => {
         console.log("Calling getTeam");
-        apiGetTeam(this.state.team.id, (response: TeamDTO) => {
-            console.log("Response getTeam:", response);
-            const team = response.toTeam();
-            console.log("Trasformed getTeam is", team);
-
-            this.setState({ team: team, modalVisible: false, teamMemberImgFile: null, teamMember: this.defaultTeamMember(), isDirty: false });
-        },
-            (error: any) => {
-                AlertComponent({ title: "Error", message: "Error getting Team" });
-                if (error.response)
-                    console.log(error.response.data);
-
-                if (error.request)
-                    console.log(error.request);
-
-                console.log('Error', error.message);
-            });
+        const team = this.repository.getTeam(id);
+        this.setState({ team: team, modalVisible: false, isDirty: false });
     }
 
+    //TODO: Add right list with players
+    //TODO: Show dragrables from team
+    //TODO: Make swap omnn clik
     render() {
+        const players = this.state.team.getTeamMembers()
         return (
-            <Block safe>
-                <ImageBackground source={FIELD_BK} style={styles.image}>
-                    {this.state.players
-                        && this.state.players.map((player, index) => {
-                            return <DragableCircularButton name={player.name} onShortPress={() => console.log("WEENA")} />
-                        })
-                    }
-                </ImageBackground>
-            </Block>)
+            <ImageBackground source={FIELD_BK} style={styles.image}>
+                {players && players.map((player, index) => 
+                    {
+                        return <DragableCircularButton name={player.name} onShortPress={() => console.log("WEENA")} />
+                    })
+                }
+            </ImageBackground>
+        )
     }
 }
 
