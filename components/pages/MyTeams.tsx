@@ -1,25 +1,30 @@
 import React, { Component } from "react";
 import { FlatList, ListRenderItem, Pressable, StyleSheet, View } from "react-native";
-import { Button, Divider, Text } from "react-native-paper";
+import { Button, Text } from "react-native-paper";
 import { Team } from "../../domain/Team";
 import TeamRepository from '../../repository/TeamRepository';
 import { MyTeamsProps } from "../app/Router";
 import TeamCard from "../common/TeamCard";
+import ConfigurationRepository from "../../repository/ConfigurationRepository";
 
 
 type MyTeamsState = {
-    teams: any
+    teams: any,
+    teamSelectedId: string
 }
 
-
 export class MyTeams extends Component<MyTeamsProps, MyTeamsState> {
-    private repository: TeamRepository;
+    private teamRepo: TeamRepository;
+    private configRepo: ConfigurationRepository;
 
     constructor(props: MyTeamsProps) {
         super(props);
-        this.repository = TeamRepository.getInstance();
+        this.teamRepo = TeamRepository.getInstance();
+        this.configRepo = ConfigurationRepository.getInstance();
+
         this.state = {
-            teams: []
+            teams: [],
+            teamSelectedId: ''
         };
     }
 
@@ -33,25 +38,33 @@ export class MyTeams extends Component<MyTeamsProps, MyTeamsState> {
         );
     }
 
-    saveTeam = () => {
+    newTeam = () => {
         this.teamDetail("");
     }
 
     getTeams = () => {
-        const teams = this.repository.getTeams();
-        console.log("Calling getTeam", teams);
+        const teams = this.teamRepo.getTeams();
+        console.log("MyTeams Calling getTeam", teams);
 
-        this.setState({ teams: teams })
+        const config = this.configRepo.getConfig()
+
+        this.setState({
+            teams: teams, teamSelectedId: config ? config.teamSelected : ''
+        })
     }
 
     teamDetail = (teamId: string) => {
         console.log("Calling teamDetail", teamId);
-        this.props.navigation.navigate('TeamProfile', { teamId })
+        this.props.navigation.navigate('TeamProfile', { screen: 'TeamProfile', params: { teamId } })
     }
 
     renderTeamListItem: ListRenderItem<Team> = ({ item }) => (
         <Pressable key={item.id} onPress={() => this.teamDetail(item.id)}>
-            <TeamCard team={item} readOnly={true} />
+            <TeamCard
+                team={item}
+                readOnly={true}
+                isSelected={item.id === this.state.teamSelectedId}
+            />
         </Pressable>
     );
 
@@ -59,7 +72,7 @@ export class MyTeams extends Component<MyTeamsProps, MyTeamsState> {
         console.log("Teams are", this.state.teams)
         return (
             <View style={styles.container}>
-                <View style={{flex:11}}>
+                <View style={{ flex: 11 }}>
                     <FlatList
                         data={this.state.teams}
                         renderItem={this.renderTeamListItem}
@@ -68,8 +81,8 @@ export class MyTeams extends Component<MyTeamsProps, MyTeamsState> {
                         ListEmptyComponent={<Text style={styles.row}>No teams created</Text>}
                     />
                 </View>
-                <View style={{flex:1}}>
-                    <Button icon="plus-circle-outline" mode="contained" onPress={this.saveTeam}>
+                <View style={{ flex: 1 }}>
+                    <Button icon="plus-circle-outline" mode="contained" onPress={this.newTeam}>
                         New Team
                     </Button>
                 </View>

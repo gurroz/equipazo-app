@@ -1,5 +1,5 @@
 import { Team } from "../domain/Team";
-import teamStorage from "./storage";
+import { teamStorage } from "./storage";
 
 export default class TeamLocalDAO {
   private storage: any;

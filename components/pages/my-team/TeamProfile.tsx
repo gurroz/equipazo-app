@@ -1,15 +1,16 @@
 import React, { Component } from "react";
 import { FlatList, ListRenderItem, StyleSheet, View } from "react-native";
-import { Divider, IconButton, MD3Colors, Text } from "react-native-paper";
+import { IconButton, MD3Colors, Text } from "react-native-paper";
 import { Team } from "../../../domain/Team";
 import { TeamMember } from "../../../domain/TeamMember";
 import TeamRepository from "../../../repository/TeamRepository";
 import { TeamProfileProps } from "../../app/Router";
-import theme from "../../app/theme";
 import AlertComponent from "../../common/AlertComponent";
+import Block from "../../common/Block";
 import TeamCard from "../../common/TeamCard";
 import TeamMemberList from '../../common/TeamMemberListItem';
-import Block from "../../common/Block";
+import ConfigurationRepository from "../../../repository/ConfigurationRepository";
+import { Configuration } from "../../../repository/Configuration";
 
 type TeamProfileState = {
     team: Team
@@ -18,12 +19,16 @@ type TeamProfileState = {
 
 export class TeamProfile extends Component<TeamProfileProps, TeamProfileState> {
     private teamRepo: TeamRepository;
+    private configRepo: ConfigurationRepository;
+
     constructor(props: TeamProfileProps) {
         super(props);
+        console.log("TeamProfile constructing")
 
         const team = Team.emptyTeam()
         team.id = props.route.params.teamId
         this.teamRepo = TeamRepository.getInstance();
+        this.configRepo = ConfigurationRepository.getInstance();
 
         this.state = {
             team: team,
@@ -32,21 +37,24 @@ export class TeamProfile extends Component<TeamProfileProps, TeamProfileState> {
     }
 
     componentDidMount = () => {
+        console.log("TeamProfile Mounting")
         this.getTeam();
         this.props.navigation.addListener(
             'focus',
             () => {
+                console.log("TeamProfile Focused")
                 this.getTeam();
             }
         );
     }
 
     getTeam = () => {
-        console.log("Calling getTeam with id", this.state.team.id);
+        console.log("TeamProfile Calling getTeam with id", this.state.team.id);
         if (this.state.team.id !== "") {
             const team = this.teamRepo.getTeam(this.state.team.id);
             console.log("response getTeam", team);
             this.setState({ team });
+            this.configRepo.saveConfig(Configuration.newConfig(team.id))
         }
     }
 
@@ -67,8 +75,11 @@ export class TeamProfile extends Component<TeamProfileProps, TeamProfileState> {
         if (team.id === "") {
             team = Team.newTeam(team.name, team.emblem)
         }
+
         this.teamRepo.saveTeam(team);
-        this.setState({team})
+        this.configRepo.saveConfig(Configuration.newConfig(team.id))
+
+        this.setState({ team })
         AlertComponent({ title: "Saved Successful", message: "Saved Team Successfully" });
     }
 
@@ -106,7 +117,7 @@ export class TeamProfile extends Component<TeamProfileProps, TeamProfileState> {
                         onSave={this.saveTeam} />
                 </View>
                 <Block
-                    style={{ flex: 5 }}
+                    style={{ flex: 4 }}
                     title="Members"
                     titleActionBtns={
                         <View style={styles.row}>
@@ -132,7 +143,7 @@ export class TeamProfile extends Component<TeamProfileProps, TeamProfileState> {
                         data={this.state.team.getTeamMembers()}
                         renderItem={this.renderListItem}
                         keyExtractor={teamMember => teamMember.id}
-                        contentContainerStyle={{ flexGrow: 1, backgroundColor: 'white'  }}
+                        contentContainerStyle={{ backgroundColor: 'white' }}
                         ListEmptyComponent={<Text style={styles.row}>No team member</Text>}
                     />
                 </Block>
@@ -150,8 +161,8 @@ const styles = StyleSheet.create({
         flex: 3
     },
     flatList: {
-        flexGrow: 0,
-        height: 320,
+        maxHeight: 235,
+        flexGrow: 0
     },
     row: {
         flexDirection: 'row',

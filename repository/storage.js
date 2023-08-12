@@ -1,3 +1,9 @@
 import { MMKV } from "react-native-mmkv";
 
-export default teamStorage = new MMKV({ id: "teams" });
+const teamStorage = new MMKV({ id: "teams" });
+const configStorage = new MMKV({ id: "config" });
+
+export {
+    teamStorage,
+    configStorage
+}

@@ -5,6 +5,7 @@ import { Team } from "../../domain/Team";
 import { DEFAULT_IMAGES } from "../app/images";
 import Block from "./Block";
 import ImagePickerComponent from "./ImagePickerComponent";
+import theme from "../app/theme";
 
 type TeamCardProps = {
     team: Team,
@@ -12,6 +13,7 @@ type TeamCardProps = {
     onSave?: Function,
     onNameChange?: any,
     readOnly?: boolean
+    isSelected?: boolean
 }
 export default class TeamCard extends PureComponent<TeamCardProps> {
     getTitle = (team: Team) => {
@@ -40,7 +42,7 @@ export default class TeamCard extends PureComponent<TeamCardProps> {
     render() {
         const team: Team = this.props.team;
         return (
-            <Block style={{ flex: 3 }}
+            <Block style={[{ flex: 3}, this.props.isSelected ? styles.isSelected: '']}
                 contentStyle={styles.cardContent}
                 actionEnabled={!this.props.readOnly}
                 action1Title="Save"
@@ -65,5 +67,9 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderWidth: 0,
+    },
+    isSelected: {
+        borderWidth: 2,
+        borderColor: theme.COLORS.PRIMARY
     }
 });

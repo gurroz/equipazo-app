@@ -1,6 +1,7 @@
-import {DrawerScreenProps} from "@react-navigation/drawer";
+import {StackScreenProps} from "@react-navigation/stack";
+import {BottomTabScreenProps} from "@react-navigation/bottom-tabs";
 
-type RootDrawerProps = {
+type RootProps = {
     MyTeams: undefined;
     TeamProfile: { teamId: string, contactsImported?: number};
     TeamMemberProfile: { teamId: string, teamMemberId?: string};
@@ -8,11 +9,11 @@ type RootDrawerProps = {
     ImportContacts: { teamId: string};
 };
 
-type MyTeamsProps = DrawerScreenProps<RootDrawerProps, 'MyTeams'>;
-type TeamProfileProps = DrawerScreenProps<RootDrawerProps, 'TeamProfile'>;
-type ImportContactsProps = DrawerScreenProps<RootDrawerProps, 'ImportContacts'>;
-type FormationsProps = DrawerScreenProps<RootDrawerProps, 'Formations'>;
-type TeamMemberProfileProps = DrawerScreenProps<RootDrawerProps, 'TeamMemberProfile'>;
+type MyTeamsProps = StackScreenProps<RootProps, 'MyTeams'>;
+type TeamProfileProps = BottomTabScreenProps<RootProps, 'TeamProfile'>;
+type ImportContactsProps = BottomTabScreenProps<RootProps, 'ImportContacts'>;
+type FormationsProps = BottomTabScreenProps<RootProps, 'Formations'>;
+type TeamMemberProfileProps = BottomTabScreenProps<RootProps, 'TeamMemberProfile'>;
 
 
 export type {
