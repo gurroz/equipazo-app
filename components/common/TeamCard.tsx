@@ -10,7 +10,6 @@ import theme from "../app/theme";
 type TeamCardProps = {
     team: Team,
     onChangeImg?: Function,
-    onSave?: Function,
     onNameChange?: any,
     readOnly?: boolean
     isSelected?: boolean
@@ -20,7 +19,8 @@ export default class TeamCard extends PureComponent<TeamCardProps> {
         if (this.props.readOnly) {
             return <Text variant="titleLarge">{team.name}</Text>
         } else {
-            return <TextInput placeholder={team.name || "Team's Name"}
+            return <TextInput
+                placeholder={team.name || "Team's Name"}
                 mode="outlined"
                 style={styles.teamTitle}
                 onEndEditing={(e) => this.props.onNameChange(e.nativeEvent.text)} />
@@ -42,11 +42,11 @@ export default class TeamCard extends PureComponent<TeamCardProps> {
     render() {
         const team: Team = this.props.team;
         return (
-            <Block style={[{ flex: 3}, this.props.isSelected ? styles.isSelected: '']}
+            <Block
+                style={[{ flex: 3 }, this.props.isSelected ? styles.isSelected : '']}
                 contentStyle={styles.cardContent}
-                actionEnabled={!this.props.readOnly}
-                action1Title="Save"
-                action1Press={this.props.onSave}>
+                actionEnabled={false}
+            >
                 {this.getContent(team)}
                 {this.getTitle(team)}
             </Block>

@@ -7,6 +7,8 @@ export class Team {
     name: string = '';
     emblem: string = '';
     members: TeamMember[] = [];
+    fieldPlayers: number = 0;
+    benchPlayers: number = 0;
 
     constructor() { }
 

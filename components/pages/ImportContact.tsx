@@ -114,7 +114,7 @@ export class ImportContact extends Component<ImportContactsProps, ImportContacts
         });
 
         this.teamRepo.saveTeam(team)
-        this.props.navigation.navigate('TeamProfile', { teamId: team.id, contactsImported: new Date().getTime() });
+        this.props.navigation.navigate('Members', { teamId: team.id, contactsImported: new Date().getTime() });
     }
 
     render() {

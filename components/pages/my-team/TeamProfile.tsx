@@ -1,20 +1,17 @@
 import React, { Component } from "react";
-import { FlatList, ListRenderItem, StyleSheet, View } from "react-native";
-import { IconButton, MD3Colors, Text } from "react-native-paper";
+import { StyleSheet, View } from "react-native";
 import { Team } from "../../../domain/Team";
-import { TeamMember } from "../../../domain/TeamMember";
+import { Configuration } from "../../../repository/Configuration";
+import ConfigurationRepository from "../../../repository/ConfigurationRepository";
 import TeamRepository from "../../../repository/TeamRepository";
 import { TeamProfileProps } from "../../app/Router";
 import AlertComponent from "../../common/AlertComponent";
 import Block from "../../common/Block";
 import TeamCard from "../../common/TeamCard";
-import TeamMemberList from '../../common/TeamMemberListItem';
-import ConfigurationRepository from "../../../repository/ConfigurationRepository";
-import { Configuration } from "../../../repository/Configuration";
+import { Text, TextInput } from "react-native-paper";
 
 type TeamProfileState = {
     team: Team
-    , onEditMode: boolean
 }
 
 export class TeamProfile extends Component<TeamProfileProps, TeamProfileState> {
@@ -31,8 +28,7 @@ export class TeamProfile extends Component<TeamProfileProps, TeamProfileState> {
         this.configRepo = ConfigurationRepository.getInstance();
 
         this.state = {
-            team: team,
-            onEditMode: false
+            team: team
         };
     }
 
@@ -65,9 +61,6 @@ export class TeamProfile extends Component<TeamProfileProps, TeamProfileState> {
         this.setState({ team: updatedTeam });
     };
 
-    renderListItem: ListRenderItem<TeamMember> = ({ item }) => (
-        <TeamMemberList key={item.id} member={item} isSelected={false} onSelect={() => this.goToTeamMemberProfile(item.id)} />
-    );
 
     saveTeam = () => {
         console.log("Saving team", this.state.team)
@@ -95,57 +88,68 @@ export class TeamProfile extends Component<TeamProfileProps, TeamProfileState> {
 
         team.name = newName;
         console.log("Saving team name " + newName);
-        this.setState({ team: team });
+        this.setState({ team });
     }
 
-    goToImportContact = () => {
-        this.props.navigation.navigate('ImportContacts', { teamId: this.state.team.id })
+    onPlayersNumberChanged = (playersCount: string) => {
+        let team = Team.copy(this.state.team)
+
+        team.fieldPlayers = playersCount != "" ? parseInt(playersCount) : 0;
+        console.log("onPlayersNumberChanged " + playersCount);
+
+        this.setState({ team });
     }
 
-    goToTeamMemberProfile = (id?: string) => {
-        this.props.navigation.navigate('TeamMemberProfile', { teamId: this.state.team.id, teamMemberId: id })
+    onBenchNumberChanged = (benchNumber: string) => {
+        let team = Team.copy(this.state.team)
+
+        team.benchPlayers = benchNumber != "" ? parseInt(benchNumber) : 0;
+        this.setState({ team });
     }
 
     render() {
+        const team =  this.state.team;
         return (
             <View style={styles.container}>
                 <View style={styles.teamCard}>
-                    <TeamCard team={this.state.team}
+                    <TeamCard
+                        team={team}
                         readOnly={false}
                         onChangeImg={this.updateImage}
                         onNameChange={this.onTeamNameChange}
-                        onSave={this.saveTeam} />
+                    />
                 </View>
-                <Block
-                    style={{ flex: 4 }}
-                    title="Members"
-                    titleActionBtns={
-                        <View style={styles.row}>
-                            <IconButton
-                                icon="account-plus"
-                                iconColor={MD3Colors.error50}
-                                size={20}
-                                onPress={() => this.goToTeamMemberProfile()}
-                                disabled={!!!this.state.team.id}
-                            />
-
-                            <IconButton
-                                icon="account-multiple-plus-outline"
-                                iconColor={MD3Colors.neutralVariant30}
-                                size={20}
-                                onPress={this.goToImportContact}
-                                disabled={!!!this.state.team.id}
+                <Block style={{ flex: 5 }} title="Configuration" actionEnabled action1Title="Save" action1Press={this.saveTeam}>
+                    <View style={styles.marginRow} >
+                        <View style={{ flex: 4 }} >
+                            <Text variant="labelLarge">Field Players</Text>
+                        </View>
+                        <View style={{ flex: 2 }} >
+                            <TextInput
+                                style={styles.numericInput}
+                                maxLength={2}
+                                mode="outlined"
+                                keyboardType="numeric"
+                                onEndEditing={(e) => this.onPlayersNumberChanged(e.nativeEvent.text)}
+                                placeholder={team.fieldPlayers + ''}
                             />
                         </View>
-                    }>
-                    <FlatList
-                        style={styles.flatList}
-                        data={this.state.team.getTeamMembers()}
-                        renderItem={this.renderListItem}
-                        keyExtractor={teamMember => teamMember.id}
-                        contentContainerStyle={{ backgroundColor: 'white' }}
-                        ListEmptyComponent={<Text style={styles.row}>No team member</Text>}
-                    />
+                    </View>
+                    <View style={styles.marginRow} >
+                        <View style={{ flex: 4 }} >
+                            <Text variant="labelLarge">Bench Players</Text>
+                        </View>
+                        <View style={{ flex: 2 }} >
+                            <TextInput
+                                style={styles.numericInput}
+                                maxLength={2}
+                                mode="outlined"
+                                keyboardType="numeric"
+                                onEndEditing={(e) => this.onBenchNumberChanged(e.nativeEvent.text)}
+                                placeholder={team.benchPlayers + ''}
+                            />
+                        </View>
+                    </View>
                 </Block>
             </View>
         );
@@ -160,12 +164,11 @@ const styles = StyleSheet.create({
     teamCard: {
         flex: 3
     },
-    flatList: {
-        maxHeight: 235,
-        flexGrow: 0
+    numericInput: {
     },
-    row: {
+    marginRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        marginTop: 10
     },
 });

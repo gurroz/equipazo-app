@@ -9,6 +9,7 @@ import { Formation } from "../pages/formation/Formation";
 import { TeamMemberProfile } from "../pages/my-team/TeamMemberProfile";
 import { TeamProfile } from "../pages/my-team/TeamProfile";
 import { MyTeams } from "../pages/MyTeams";
+import { Members } from '../pages/my-team/Members';
 
 const theme = {
     ...DefaultTheme,
@@ -25,6 +26,7 @@ function Tabscreen() {
         <TeamNav.Navigator>
             <TeamNav.Screen name="MyTeams" component={MyTeams} options={{ title: 'Switch Teams', headerShown: false, tabBarIcon: 'home-group' }} />
             <TeamNav.Screen name="TeamProfile" component={TeamProfile} options={{ title: 'My Team', tabBarIcon: 'home-heart' }} />
+            <TeamNav.Screen name="Members" component={Members} options={{ title: 'Members', tabBarIcon: 'account-multiple-plus-outline' }} />
             <TeamNav.Screen name="Formations" component={Formation} options={{ title: 'Formations', tabBarIcon: 'soccer-field' }} />
         </TeamNav.Navigator>
     );
@@ -34,7 +36,7 @@ const HomeNav = createStackNavigator();
 function MyTeamsScreen() {
     return (
         <HomeNav.Navigator initialRouteName="MyTeams">
-            <HomeNav.Screen name="MyTeams" component={MyTeams} options={{ title: 'My Teams', headerShown: false  }}  />
+            <HomeNav.Screen name="MyTeams" component={MyTeams} options={{ title: 'My Teams', headerShown: false }} />
             <HomeNav.Screen name="TeamProfile" component={Tabscreen} />
             <HomeNav.Screen name="ImportContacts" component={ImportContact} options={{ title: 'Import Contacts' }} />
             <HomeNav.Screen name="TeamMemberProfile" component={TeamMemberProfile} options={{ title: 'Team Member Profile' }} />

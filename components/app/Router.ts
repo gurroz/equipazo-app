@@ -7,6 +7,7 @@ type RootProps = {
     TeamMemberProfile: { teamId: string, teamMemberId?: string};
     Formations: { teamId: string};
     ImportContacts: { teamId: string};
+    Members: {teamId: string}
 };
 
 type MyTeamsProps = StackScreenProps<RootProps, 'MyTeams'>;
@@ -14,6 +15,7 @@ type TeamProfileProps = BottomTabScreenProps<RootProps, 'TeamProfile'>;
 type ImportContactsProps = BottomTabScreenProps<RootProps, 'ImportContacts'>;
 type FormationsProps = BottomTabScreenProps<RootProps, 'Formations'>;
 type TeamMemberProfileProps = BottomTabScreenProps<RootProps, 'TeamMemberProfile'>;
+type MembersProps = BottomTabScreenProps<RootProps, 'Members'>;
 
 
 export type {
@@ -22,4 +24,5 @@ export type {
     , FormationsProps
     , ImportContactsProps
     , TeamMemberProfileProps
+    , MembersProps
 };
