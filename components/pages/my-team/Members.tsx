@@ -10,7 +10,7 @@ import Block from "../../common/Block";
 import TeamCard from "../../common/TeamCard";
 import TeamMemberList from '../../common/TeamMemberListItem';
 import ConfigurationRepository from "../../../repository/ConfigurationRepository";
-import { Configuration } from "../../../repository/Configuration";
+import { Configuration } from "../../../domain/Configuration";
 
 type MembersState = {
     team: Team

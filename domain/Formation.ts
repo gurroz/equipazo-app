@@ -1,0 +1,76 @@
+import { FormationPosition } from "./FormationPosition";
+import { Position } from "./Position";
+import { Serializable } from "./Serializable";
+import { TeamMember } from "./TeamMember";
+
+export class Formation extends Serializable<Formation>{
+    name: string = '';
+    isTemplate: boolean = false;
+    playersPositions: FormationPosition[] = [];
+
+    constructor(name: string, isTemplate: boolean) {
+        super();
+        this.name = name;
+        this.isTemplate = isTemplate;
+        this.playersPositions = [];
+    }
+
+    addPlayersPosition = (playersPosition: FormationPosition) => {
+        this.playersPositions?.push(playersPosition);
+    }
+
+    /**
+     * Adds the player to the prefered position, if not already assigned in other position.
+     */
+    addPlayerToPosition = (player: TeamMember) => {
+        const usedPlayers = this.playersPositions.filter(playerPosition => playerPosition.player).map(playerPosition => playerPosition.player?.id);
+        const newPlayerPositions = this.playersPositions.map(playerPosition => {
+            if(!playerPosition.player && !usedPlayers.includes(player.id) && player.hasPosition(playerPosition.position)) {
+                playerPosition.player = player;
+                usedPlayers.push(player.id);
+            }
+
+            return playerPosition
+        })
+
+        this.playersPositions = newPlayerPositions;
+    }
+
+    copy = (obj: Formation): Formation => {
+        const newFormation = this.emptyObj();
+        newFormation.isTemplate = obj.isTemplate;
+        newFormation.playersPositions = obj.playersPositions;
+
+        return newFormation;
+    }
+
+    emptyObj = (): Formation => {
+        return new Formation("", false);
+    }
+
+    static getFromJSON = (json: object): Formation => {
+        const newFormaiton = new Formation("", false);
+        return newFormaiton.fromJSON(json);
+    }
+
+    static generateTemplates = (): Formation[] => {
+        const result = [];
+        const formation442 = new Formation("4-4-2", true);
+        formation442.addPlayersPosition(new FormationPosition(Position.GK, 0, 2))
+        formation442.addPlayersPosition(new FormationPosition(Position.LB, 1, 0))
+        formation442.addPlayersPosition(new FormationPosition(Position.CB, 1, 1))
+        formation442.addPlayersPosition(new FormationPosition(Position.CB, 1, 3))
+        formation442.addPlayersPosition(new FormationPosition(Position.RB, 1, 4))
+        formation442.addPlayersPosition(new FormationPosition(Position.DM, 2, 1))
+        formation442.addPlayersPosition(new FormationPosition(Position.DM, 2, 3))
+        formation442.addPlayersPosition(new FormationPosition(Position.CM, 3, 1))
+        formation442.addPlayersPosition(new FormationPosition(Position.AM, 3, 3))
+        formation442.addPlayersPosition(new FormationPosition(Position.CF, 4, 1))
+        formation442.addPlayersPosition(new FormationPosition(Position.CF, 4, 3))
+
+        result.push(formation442);
+
+
+        return result
+    }
+}

@@ -9,10 +9,8 @@ export default class TeamLocalDAO {
 
   getTeams(): Team[] {
     const jsonObj = JSON.stringify(this.storage.getAllKeys())
-    console.log("GEtting teams:", jsonObj)
     let teamsId: string[] = JSON.parse(jsonObj || '')
     if (teamsId && (teamsId.length > 0)) {
-      console.log("GEtting teams 3:", teamsId)
       return teamsId.map(id => {
         return Team.fromJSON(JSON.parse(this.storage.getString(id)))
       })
@@ -23,16 +21,12 @@ export default class TeamLocalDAO {
 
   getTeam(teamId: string): Team {
     const jsonObj = this.storage.getString(teamId)
-    console.log("GEtting team", teamId, jsonObj)
-
     let team: Team = Team.fromJSON(JSON.parse(jsonObj || ''))
-    console.log("GEtting team2:", team, (team instanceof Team))
 
     if (team) {
       return team
     } else {
-      let team: Team = Team.emptyTeam();
-      return team
+      return Team.emptyTeam()
     }
   }
 

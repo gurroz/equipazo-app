@@ -9,7 +9,7 @@ import { TeamMemberProfile } from "../pages/my-team/TeamMemberProfile";
 import { TeamProfile } from "../pages/my-team/TeamProfile";
 import { MyTeams } from "../pages/MyTeams";
 import { Members } from '../pages/my-team/Members';
-import Formation from '../pages/formation/Formation';
+import { PitchFormation } from '../pages/formation/PitchFormation';
 
 const theme = {
     ...DefaultTheme,
@@ -27,7 +27,7 @@ function Tabscreen() {
             <TeamNav.Screen name="MyTeams" component={MyTeams} options={{ title: 'Switch Teams', headerShown: false, tabBarIcon: 'home-group' }} />
             <TeamNav.Screen name="TeamProfile" component={TeamProfile} options={{ title: 'My Team', tabBarIcon: 'home-heart' }} />
             <TeamNav.Screen name="Members" component={Members} options={{ title: 'Members', tabBarIcon: 'account-multiple-plus-outline' }} />
-            <TeamNav.Screen name="Formations" component={Formation} options={{ title: 'Formations', tabBarIcon: 'soccer-field' }} />
+            <TeamNav.Screen name="PitchFormation" component={PitchFormation} options={{ title: 'Formations', tabBarIcon: 'soccer-field' }} />
         </TeamNav.Navigator>
     );
 }

@@ -1,4 +1,4 @@
-import { Configuration } from "./Configuration";
+import { Configuration } from "../domain/Configuration";
 import ConfigurationInterface from "./ConfigurationRepositoryInterface";
 import ConfigurationRepositoryLocal from "./ConfigurationRepositoryLocal";
 

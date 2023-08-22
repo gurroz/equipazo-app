@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import { Position } from './Position';
 
-export type POSITIONS = 'GK' | 'LB' | 'CB' | 'RB' | 'DM' | 'CM' | 'AM' | 'LW' | 'CF' | 'RW'
 export class TeamMember {
     id: string = '';
     name: string = '';
@@ -8,7 +8,7 @@ export class TeamMember {
     mobile: string = '';
     isPlayer: boolean = false;
     isCoach: boolean = false;
-    positions: POSITIONS[] = [];
+    positions: Position[] = [];
 
     constructor() {}
 
@@ -44,5 +44,9 @@ export class TeamMember {
         newTeamMember.picture = picture;
 
         return newTeamMember;
+    }
+
+    hasPosition = (position: Position) : boolean => {
+        return this.positions.includes(position);
     }
 }

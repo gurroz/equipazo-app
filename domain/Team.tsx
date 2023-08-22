@@ -1,6 +1,7 @@
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { TeamMember } from "./TeamMember";
+import { Formation } from './Formation';
 
 export class Team {
     id: string = '';
@@ -9,6 +10,7 @@ export class Team {
     members: TeamMember[] = [];
     fieldPlayers: number = 0;
     benchPlayers: number = 0;
+    formation: Formation = new Formation("", false);
 
     constructor() { }
 
@@ -36,7 +38,14 @@ export class Team {
 
     static copy(oldTeam: Team) {
         const team = Team.newTeamWithId(oldTeam.id, oldTeam.name, oldTeam.emblem);
-        team.members = oldTeam.members
+        const teamMembers : TeamMember[] = [];
+        oldTeam.members.forEach(teamMember => {
+            teamMembers.push(Object.assign(TeamMember.emptyTeamMember(), teamMember));
+        })
+        team.members = teamMembers;
+        team.fieldPlayers = oldTeam.fieldPlayers;
+        team.benchPlayers = oldTeam.benchPlayers;
+        team.formation = Object.assign(new Formation("", false), oldTeam.formation)
 
         return team
     }
@@ -79,5 +88,15 @@ export class Team {
 
             return 0;
         }) : []
+    }
+
+    initFormation = () => {
+        const formation = Object.assign({}, this.formation);
+        if(formation && formation.isTemplate) {
+            const players = this.getTeamMembers();
+            players.forEach(player => {
+                formation.addPlayerToPosition(player);
+            });
+        }
     }
 }

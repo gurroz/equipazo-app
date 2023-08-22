@@ -1,4 +1,4 @@
-import { Configuration } from "./Configuration";
+import { Configuration } from "../domain/Configuration";
 import { configStorage } from "./storage";
 
 export default class ConfigurationLocalDAO {

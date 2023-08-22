@@ -1,14 +1,20 @@
 import {StyleSheet} from "react-native";
 import React from "react";
 import Draggable from "react-native-draggable";
+import theme from "../app/theme";
 
-export default function DragableCircularButton(props: any) {
-    const randomPos = Math.abs((Math.random() * 100) + (Math.random() * 100) );
+type DragableCircularButtonProps = {
+    name: string, 
+    posX: number, 
+    posY: number, 
+    onShortPress: any
+}
+export default function DragableCircularButton(props: DragableCircularButtonProps) {
     return <Draggable
-            x={randomPos}
-            y={randomPos}
-            renderSize={60}
-            renderColor="#cff1ff"
+            x={props.posX}
+            y={props.posY}
+            renderSize={50}
+            renderColor={theme.COLORS.GREY}
             renderText={props.name}
             isCircle
             // imageSource

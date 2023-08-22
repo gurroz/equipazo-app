@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { StyleSheet, View } from "react-native";
 import { Team } from "../../../domain/Team";
-import { Configuration } from "../../../repository/Configuration";
+import { Configuration } from "../../../domain/Configuration";
 import ConfigurationRepository from "../../../repository/ConfigurationRepository";
 import TeamRepository from "../../../repository/TeamRepository";
 import { TeamProfileProps } from "../../app/Router";

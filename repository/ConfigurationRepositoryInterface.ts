@@ -1,4 +1,4 @@
-import { Configuration } from "./Configuration";
+import { Configuration } from "../domain/Configuration";
 
 export default interface ConfigurationRepositoryInterface {
 

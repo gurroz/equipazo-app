@@ -5,7 +5,7 @@ type RootProps = {
     MyTeams: undefined;
     TeamProfile: { teamId: string, contactsImported?: number};
     TeamMemberProfile: { teamId: string, teamMemberId?: string};
-    Formations: { teamId: string};
+    PitchFormation: { teamId: string};
     ImportContacts: { teamId: string};
     Members: {teamId: string}
 };
@@ -13,7 +13,7 @@ type RootProps = {
 type MyTeamsProps = StackScreenProps<RootProps, 'MyTeams'>;
 type TeamProfileProps = BottomTabScreenProps<RootProps, 'TeamProfile'>;
 type ImportContactsProps = BottomTabScreenProps<RootProps, 'ImportContacts'>;
-type FormationsProps = BottomTabScreenProps<RootProps, 'Formations'>;
+type PitchFormationProps = BottomTabScreenProps<RootProps, 'PitchFormation'>;
 type TeamMemberProfileProps = BottomTabScreenProps<RootProps, 'TeamMemberProfile'>;
 type MembersProps = BottomTabScreenProps<RootProps, 'Members'>;
 
@@ -21,7 +21,7 @@ type MembersProps = BottomTabScreenProps<RootProps, 'Members'>;
 export type {
     MyTeamsProps
     , TeamProfileProps
-    , FormationsProps
+    , PitchFormationProps
     , ImportContactsProps
     , TeamMemberProfileProps
     , MembersProps

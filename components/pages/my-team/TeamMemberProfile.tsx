@@ -9,6 +9,7 @@ import { DEFAULT_IMAGES } from "../../app/images";
 import AlertComponent from "../../common/AlertComponent";
 import Block from "../../common/Block";
 import ImagePickerComponent from "../../common/ImagePickerComponent";
+import { Position } from "../../../domain/Position";
 
 
 type TeamMemberProfileState = {
@@ -19,9 +20,9 @@ type TeamMemberProfileState = {
 }
 
 type ROLES = 'COACH' | 'PLAYER';
-const DEF_POSITONS = ['GK', 'LB', 'CB', 'RB'];
-const MED_POSITONS = ['DM', 'CM', 'AM'];
-const FWRD_POSITONS = ['LW', 'CF', 'RW'];
+const DEF_POSITONS = [Position.GK, Position.LB, Position.CB, Position.RB];
+const MED_POSITONS = [Position.DM, Position.CM, Position.AM];
+const FWRD_POSITONS = [Position.LF, Position.CF, Position.RF];
 
 export class TeamMemberProfile extends Component<TeamMemberProfileProps, TeamMemberProfileState> {
     private teamRepo: TeamRepository;
