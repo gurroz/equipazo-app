@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { ImageBackground, StyleSheet } from "react-native";
+import { ImageBackground, StyleSheet, View } from "react-native";
 import { FIELD_BK } from "../../../assets/images";
 import { Formation } from "../../../domain/Formation";
 import { Team } from "../../../domain/Team";
@@ -7,10 +7,12 @@ import ConfigurationRepository from "../../../repository/ConfigurationRepository
 import TeamRepository from "../../../repository/TeamRepository";
 import { PitchFormationProps } from "../../app/Router";
 import DragableCircularButton from "../../common/DragableCircularButton";
+import { Picker } from "@react-native-picker/picker";
+import theme from "../../app/theme";
 
 type FormationState = {
     team: Team,
-    defaultFormations: Formation[]
+    defaultFormations: Formation[],
 }
 
 export class PitchFormation extends Component<PitchFormationProps, FormationState> {
@@ -47,9 +49,8 @@ export class PitchFormation extends Component<PitchFormationProps, FormationStat
         console.log("TeamProfile Calling getTeam with id", this.state.team.id);
         if (this.state.team.id !== "") {
             const team = this.teamRepo.getTeam(this.state.team.id);
-            if(team.formation.name === "") {
-                team.formation = Object.assign({}, this.state.defaultFormations[0]);
-                team.initFormation();
+            if (team.formation.name === "") {
+                team.updateFormation( this.state.defaultFormations[0]);
             }
             console.log("response getTeam", team);
             this.setState({ team });
@@ -59,8 +60,8 @@ export class PitchFormation extends Component<PitchFormationProps, FormationStat
     getFormationWithPlayers = () => {
         if (this.state.team.formation) {
             return this.state.team.formation.playersPositions.map((playersPosition, index) => {
-               const name = playersPosition.player ? playersPosition.player.name : playersPosition.position.toString();
-                return <DragableCircularButton 
+                const name = playersPosition.player ? playersPosition.player.name : playersPosition.position.toString();
+                return <DragableCircularButton
                     key={index}
                     name={name}
                     onShortPress={() => console.log("WEENA")}
@@ -75,20 +76,41 @@ export class PitchFormation extends Component<PitchFormationProps, FormationStat
         return (column * 70) + 20;
     }
 
-    
+
     calculateMapPositionY = (row: number) => {
         return (row * 100) + 20;
     }
 
-    //TODO: Get default Formations from config/team
-    //TODO: Add right list with players
-    //TODO: Add save button and save formation, show that formation onwards
-    //TODO: Make swap omnn clik
+    updateSelectedFormation = (formationSelectedName: string) => {
+        const foundFormation = this.state.defaultFormations.filter(formation => formation.name === formationSelectedName);
+        if (foundFormation && foundFormation.length > 0) {
+            const team = Team.copy(this.state.team);
+            team.updateFormation(foundFormation[0]);
+
+            this.setState({ team })
+        }
+    }
+
     render() {
         return (
-            <ImageBackground source={FIELD_BK} style={styles.image}>
-                {this.getFormationWithPlayers()}
-            </ImageBackground>
+            <View style={styles.container}>
+                <View style={{ flex: 1 }}>
+                    <Picker
+                        selectedValue={this.state.team.formation.name}
+                        onValueChange={(itemValue, itemIndex) => this.updateSelectedFormation(itemValue)}>
+                        {this.state.defaultFormations && this.state.defaultFormations.map(formation => {
+                            return <Picker.Item key={formation.name} label={formation.name} value={formation.name} />
+                        })}
+                    </Picker>
+                </View>
+
+                <View style={{ flex: 11 }}>
+                    <ImageBackground source={FIELD_BK} style={styles.image}>
+                        {this.getFormationWithPlayers()}
+                    </ImageBackground>
+                </View>
+
+            </View>
         )
     }
 }
@@ -96,7 +118,7 @@ export class PitchFormation extends Component<PitchFormationProps, FormationStat
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: theme.COLORS.GREY,
         margin: 10,
         // height: '100%'
     },

@@ -39,7 +39,7 @@ export class Formation extends Serializable<Formation>{
     copy = (obj: Formation): Formation => {
         const newFormation = this.emptyObj();
         newFormation.isTemplate = obj.isTemplate;
-        newFormation.playersPositions = obj.playersPositions;
+        newFormation.playersPositions = Object.assign([], obj.playersPositions);
 
         return newFormation;
     }
@@ -70,6 +70,20 @@ export class Formation extends Serializable<Formation>{
 
         result.push(formation442);
 
+        const formation433 = new Formation("4-3-3", true);
+        formation433.addPlayersPosition(new FormationPosition(Position.GK, 0, 2))
+        formation433.addPlayersPosition(new FormationPosition(Position.LB, 1, 0))
+        formation433.addPlayersPosition(new FormationPosition(Position.CB, 1, 1))
+        formation433.addPlayersPosition(new FormationPosition(Position.CB, 1, 3))
+        formation433.addPlayersPosition(new FormationPosition(Position.RB, 1, 4))
+        formation433.addPlayersPosition(new FormationPosition(Position.DM, 2, 1))
+        formation433.addPlayersPosition(new FormationPosition(Position.DM, 2, 3))
+        formation433.addPlayersPosition(new FormationPosition(Position.CM, 3, 2))
+        formation433.addPlayersPosition(new FormationPosition(Position.LF, 4, 0))
+        formation433.addPlayersPosition(new FormationPosition(Position.CF, 4, 2))
+        formation433.addPlayersPosition(new FormationPosition(Position.LB, 4, 4))
+
+        result.push(formation433);
 
         return result
     }

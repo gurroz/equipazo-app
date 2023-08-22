@@ -90,12 +90,13 @@ export class Team {
         }) : []
     }
 
-    initFormation = () => {
-        const formation = Object.assign({}, this.formation);
-        if(formation && formation.isTemplate) {
+    updateFormation = (newFormation: Formation) => {
+        this.formation = Object.assign({}, newFormation);
+        if(this.formation && this.formation.isTemplate) {
             const players = this.getTeamMembers();
+
             players.forEach(player => {
-                formation.addPlayerToPosition(player);
+                this.formation.addPlayerToPosition(player);
             });
         }
     }
