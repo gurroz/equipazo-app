@@ -45,7 +45,7 @@ export class Team {
         team.members = teamMembers;
         team.fieldPlayers = oldTeam.fieldPlayers;
         team.benchPlayers = oldTeam.benchPlayers;
-        team.formation = Object.assign(new Formation("", false), oldTeam.formation)
+        team.formation = new Formation("", false).copy(oldTeam.formation);
 
         return team
     }
@@ -92,12 +92,23 @@ export class Team {
 
     updateFormation = (newFormation: Formation) => {
         this.formation = Object.assign({}, newFormation);
-        if(this.formation && this.formation.isTemplate) {
+        if(this.formation) {
+            console.log("updateFormation", this.formation.playersPositions)
+            this.formation.resetPositions();
+            console.log("updateFormation", this.formation.playersPositions)
+
             const players = this.getTeamMembers();
 
             players.forEach(player => {
                 this.formation.addPlayerToPosition(player);
             });
+        }
+    }
+
+    updateFormationName = (name: string) => {
+        if(this.formation) {
+            this.formation.name = name;
+            this.formation.isTemplate = false;
         }
     }
 }

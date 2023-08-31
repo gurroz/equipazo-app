@@ -1,35 +1,46 @@
+import { Picker } from "@react-native-picker/picker";
 import React, { Component } from "react";
-import { ImageBackground, StyleSheet, View } from "react-native";
-import { FIELD_BK } from "../../../assets/images";
+import { StyleSheet, View } from "react-native";
+import { Button, Modal, Portal, Text, TextInput } from "react-native-paper";
 import { Formation } from "../../../domain/Formation";
 import { Team } from "../../../domain/Team";
 import ConfigurationRepository from "../../../repository/ConfigurationRepository";
+import FormationRepository from "../../../repository/FormationRepository";
 import TeamRepository from "../../../repository/TeamRepository";
 import { PitchFormationProps } from "../../app/Router";
-import DragableCircularButton from "../../common/DragableCircularButton";
-import { Picker } from "@react-native-picker/picker";
 import theme from "../../app/theme";
+import Block from "../../common/Block";
+import { PitchWithPlayers } from "./PitchWithPlayers";
 
 type FormationState = {
     team: Team,
     defaultFormations: Formation[],
+    modalOpen: boolean,
+    newFormationName: string,
+    pitchHeight: number,
+    pitchWidth: number
 }
 
 export class PitchFormation extends Component<PitchFormationProps, FormationState> {
     private teamRepo: TeamRepository;
     private configRepo: ConfigurationRepository;
-
+    private formationRepo: FormationRepository;
     constructor(props: PitchFormationProps) {
         super(props);
 
         this.teamRepo = TeamRepository.getInstance();
         this.configRepo = ConfigurationRepository.getInstance();
+        this.formationRepo = FormationRepository.getInstance();
 
         const team = Team.emptyTeam();
         team.id = this.configRepo.getConfig().teamSelected;
         this.state = {
             team: team,
-            defaultFormations: Formation.generateTemplates()
+            defaultFormations: this.formationRepo.getFormations(),
+            modalOpen: false,
+            newFormationName: '',
+            pitchHeight: 0,
+            pitchWidth: 0
         };
     }
 
@@ -39,46 +50,22 @@ export class PitchFormation extends Component<PitchFormationProps, FormationStat
         this.props.navigation.addListener(
             'focus',
             () => {
-                console.log("TeamProfile Focused")
+                console.log("Focus")
                 this.getTeam();
             }
         );
     }
 
     getTeam = () => {
-        console.log("TeamProfile Calling getTeam with id", this.state.team.id);
+        console.log("PitchFormation Calling getTeam with id", this.state.team.id);
         if (this.state.team.id !== "") {
             const team = this.teamRepo.getTeam(this.state.team.id);
             if (team.formation.name === "") {
-                team.updateFormation( this.state.defaultFormations[0]);
+                team.updateFormation(this.state.defaultFormations[0]);
             }
             console.log("response getTeam", team);
-            this.setState({ team });
+            this.setState({ team: team, newFormationName: team.formation.name });
         }
-    }
-
-    getFormationWithPlayers = () => {
-        if (this.state.team.formation) {
-            return this.state.team.formation.playersPositions.map((playersPosition, index) => {
-                const name = playersPosition.player ? playersPosition.player.name : playersPosition.position.toString();
-                return <DragableCircularButton
-                    key={index}
-                    name={name}
-                    onShortPress={() => console.log("WEENA")}
-                    posX={this.calculateMapPositionX(playersPosition.column)}
-                    posY={this.calculateMapPositionY(playersPosition.row)}
-                />
-            })
-        }
-    }
-
-    calculateMapPositionX = (column: number) => {
-        return (column * 70) + 20;
-    }
-
-
-    calculateMapPositionY = (row: number) => {
-        return (row * 100) + 20;
     }
 
     updateSelectedFormation = (formationSelectedName: string) => {
@@ -87,29 +74,104 @@ export class PitchFormation extends Component<PitchFormationProps, FormationStat
             const team = Team.copy(this.state.team);
             team.updateFormation(foundFormation[0]);
 
-            this.setState({ team })
+            this.setState({ team, newFormationName: formationSelectedName })
         }
     }
 
+    saveFormation = () => {
+        console.log("saveFormation")
+        const team = Team.copy(this.state.team);
+
+        team.updateFormationName(this.state.newFormationName);
+        const formation = team.formation;
+        this.teamRepo.saveTeam(team);
+        this.formationRepo.saveFormation(formation);
+        const defaultFormations = this.formationRepo.getFormations();
+
+        console.log("saveFormation 2 ", defaultFormations)
+
+        this.setState({ team: team, defaultFormations: defaultFormations });
+        this.toogleModal();
+    }
+
+    toogleModal = () => {
+        this.setState({ modalOpen: !this.state.modalOpen });
+    }
+
+    onNewFormationNameChanged = (newName: string) => {
+        this.setState({ newFormationName: newName });
+    }
+
+    isFormationNameValid = (): boolean => {
+        return Boolean(this.state.newFormationName) && (!this.state.team.formation.isTemplate || this.state.newFormationName !== this.state.team.formation.name)
+    }
+
+    getFormations = () => {
+        const formations = this.state.defaultFormations;
+
+        return formations.sort((a, b) => {
+            if (a.name < b.name) {
+                return -1;
+            }
+            if (a.name > b.name) {
+                return 1;
+            }
+            return 0;
+        });
+    }
+
+    setPitchDimensions = (event: any) => {
+        const { x, y, height, width } = event.nativeEvent.layout;
+        console.log("setPitchDimensions", x, y, height, width)
+        this.setState({ pitchHeight: height, pitchWidth: width });
+    }
+
+    // TODO: Save Position of circles after move
     render() {
         return (
             <View style={styles.container}>
                 <View style={{ flex: 1 }}>
-                    <Picker
-                        selectedValue={this.state.team.formation.name}
-                        onValueChange={(itemValue, itemIndex) => this.updateSelectedFormation(itemValue)}>
-                        {this.state.defaultFormations && this.state.defaultFormations.map(formation => {
-                            return <Picker.Item key={formation.name} label={formation.name} value={formation.name} />
-                        })}
-                    </Picker>
+                    <View style={styles.row}>
+                        <View style={{ flex: 3 }}>
+                            <Picker
+                                selectedValue={this.state.team.formation.name}
+                                onValueChange={(itemValue, itemIndex) => this.updateSelectedFormation(itemValue)}>
+                                {this.getFormations().map(formation => {
+                                    return <Picker.Item key={formation.name} label={formation.name} value={formation.name} />
+                                })}
+                            </Picker>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Button mode="contained" onPress={this.toogleModal}>Save</Button>
+                        </View>
+                    </View>
                 </View>
 
-                <View style={{ flex: 11 }}>
-                    <ImageBackground source={FIELD_BK} style={styles.image}>
-                        {this.getFormationWithPlayers()}
-                    </ImageBackground>
+                <View style={{ flex: 11 }} onLayout={this.setPitchDimensions}>
+                    {this.state.pitchHeight > 0 &&
+                        <PitchWithPlayers formation={this.state.team.formation} pitchHeight={this.state.pitchHeight} pitchWidth={this.state.pitchWidth} />
+                    }
                 </View>
 
+                <Portal>
+                    <Modal visible={this.state.modalOpen} onDismiss={this.toogleModal} contentContainerStyle={{ backgroundColor: 'white', padding: 20, height: 300 }}>
+                        <Block style={{ flex: 1 }} title="Save Formation" actionEnabled={this.isFormationNameValid()} action1Title="Save" action1Press={this.saveFormation}>
+                            <View style={styles.row}>
+                                <View style={{ flex: 1 }} >
+                                    <Text variant="labelLarge">Name</Text>
+                                </View>
+                                <View style={{ flex: 4 }} >
+                                    <TextInput
+                                        maxLength={25}
+                                        mode="outlined"
+                                        onEndEditing={(e) => this.onNewFormationNameChanged(e.nativeEvent.text)}
+                                        placeholder={this.state.newFormationName}
+                                    />
+                                </View>
+                            </View>
+                        </Block>
+                    </Modal>
+                </Portal>
             </View>
         )
     }
@@ -119,12 +181,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.COLORS.GREY,
-        margin: 10,
+        margin: 5,
         // height: '100%'
     },
-    image: {
-        flex: 1,
-        resizeMode: "cover",
-        justifyContent: "center"
+    row: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        padding: 5,
+        textAlignVertical: 'top',
+        verticalAlign: 'top'
     },
 });

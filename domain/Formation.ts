@@ -36,10 +36,18 @@ export class Formation extends Serializable<Formation>{
         this.playersPositions = newPlayerPositions;
     }
 
+    resetPositions = () => {
+        this.playersPositions.forEach(playerPosition => {
+            playerPosition.coordX = undefined;
+            playerPosition.coordY = undefined;
+        })
+    }
+
     copy = (obj: Formation): Formation => {
         const newFormation = this.emptyObj();
         newFormation.isTemplate = obj.isTemplate;
-        newFormation.playersPositions = Object.assign([], obj.playersPositions);
+        newFormation.playersPositions = obj.playersPositions.map(pp => Object.assign(new FormationPosition(Position.RF,0,0), pp))
+        newFormation.name = obj.name;
 
         return newFormation;
     }

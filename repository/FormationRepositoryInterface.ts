@@ -1,7 +1,6 @@
 import { Formation } from "../domain/Formation";
 
 export default interface FormationRepositoryInterface {
-
-    getTemplatesFormations: () => Formation[];
+    getAllFormations: () => Formation[];
     saveFormation: (formation: Formation) => void;
 }

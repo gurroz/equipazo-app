@@ -9,8 +9,8 @@ export default class FormationRepositoryLocal implements FormationRepositoryInte
         this.localDao = new FormationLocalDAO();
     }
 
-    getTemplatesFormations = () => {
-        return this.localDao.getTemplateFormations();
+    getAllFormations = () => {
+        return this.localDao.getAllFormations();
     }
 
     saveFormation = (formation: Formation) => {

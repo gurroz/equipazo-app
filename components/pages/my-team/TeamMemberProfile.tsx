@@ -136,7 +136,7 @@ export class TeamMemberProfile extends Component<TeamMemberProfileProps, TeamMem
     addPosition = (values: string[]) => {
         console.log("NEw Postion", values)
         const teamMember: TeamMember = TeamMember.copy(this.state.teamMember);
-        teamMember.positions = values
+        teamMember.positions = values;
         this.setState({ teamMember: teamMember, isDirty: true });
     }
 

@@ -7,7 +7,10 @@ type DragableCircularButtonProps = {
     name: string, 
     posX: number, 
     posY: number, 
-    onShortPress: any
+    onShortPress: any,
+    onDragRelease: any,
+    maxHeight?: number,
+    maxWidth?: number
 }
 export default function DragableCircularButton(props: DragableCircularButtonProps) {
     return <Draggable
@@ -16,6 +19,11 @@ export default function DragableCircularButton(props: DragableCircularButtonProp
             renderSize={50}
             renderColor={theme.COLORS.GREY}
             renderText={props.name}
+            onDragRelease={props.onDragRelease}
+            minX={0}
+            minY={0}
+            maxX={props.maxWidth}
+            maxY={props.maxHeight}
             isCircle
             // imageSource
             onShortPressRelease={props.onShortPress}/>

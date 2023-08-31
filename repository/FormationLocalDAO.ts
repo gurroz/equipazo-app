@@ -7,23 +7,21 @@ export default class FormationLocalDAO {
     this.storage = formationsStorage
   }
 
-  getTemplateFormations(): Formation[] {
+  getAllFormations(): Formation[] {
     const jsonObj = JSON.stringify(this.storage.getAllKeys())
-    console.log("GEtting formations:", jsonObj)
     let formationsId: string[] = JSON.parse(jsonObj || '')
-    if (formationsId && (formationsId.length > 0)) {
-      console.log("GEtting formations 3:", formationsId)
-      return formationsId.map(id => {
-        return  Formation.getFromJSON(JSON.parse(this.storage.getString(id)))
+    const allFormations = Formation.generateTemplates(); // TODO: This should be moved to the init process
+    if(formationsId && formationsId.length > 0) {
+      formationsId.forEach(id => {
+        allFormations.push(Formation.getFromJSON(JSON.parse(this.storage.getString(id))))
       })
-    } else {
-      return []
     }
+    
+
+    return allFormations
   }
 
   saveFormation(formation: Formation) {
-    console.log("Saving config", formation, JSON.stringify(formation))
-
     this.storage.set(formation.name, JSON.stringify(formation))
   }
 }

@@ -24,10 +24,10 @@ const TeamNav = createMaterialBottomTabNavigator();
 function Tabscreen() {
     return (
         <TeamNav.Navigator>
-            <TeamNav.Screen name="MyTeams" component={MyTeams} options={{ title: 'Switch Teams', headerShown: false, tabBarIcon: 'home-group' }} />
+            <TeamNav.Screen name="MyTeams" component={MyTeams} options={{ title: 'Switch Teams',tabBarIcon: 'home-group' }} />
             <TeamNav.Screen name="TeamProfile" component={TeamProfile} options={{ title: 'My Team', tabBarIcon: 'home-heart' }} />
             <TeamNav.Screen name="Members" component={Members} options={{ title: 'Members', tabBarIcon: 'account-multiple-plus-outline' }} />
-            <TeamNav.Screen name="PitchFormation" component={PitchFormation} options={{ title: 'Formations', tabBarIcon: 'soccer-field' }} />
+            <TeamNav.Screen name="PitchFormation" component={PitchFormation} options={{ title: 'Formations', tabBarIcon: 'soccer-field'}} />
         </TeamNav.Navigator>
     );
 }
@@ -37,7 +37,7 @@ function MyTeamsScreen() {
     return (
         <HomeNav.Navigator initialRouteName="MyTeams">
             <HomeNav.Screen name="MyTeams" component={MyTeams} options={{ title: 'My Teams', headerShown: false }} />
-            <HomeNav.Screen name="TeamProfile" component={Tabscreen} />
+            <HomeNav.Screen name="TeamProfile" component={Tabscreen} options={{ headerShown: false }}/>
             <HomeNav.Screen name="ImportContacts" component={ImportContact} options={{ title: 'Import Contacts' }} />
             <HomeNav.Screen name="TeamMemberProfile" component={TeamMemberProfile} options={{ title: 'Team Member Profile' }} />
         </HomeNav.Navigator>

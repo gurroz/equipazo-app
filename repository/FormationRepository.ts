@@ -1,9 +1,6 @@
-import { Team } from "../domain/Team";
+import { Formation } from "../domain/Formation";
 import FormationRepositoryInterface from "./FormationRepositoryInterface";
 import FormationRepositoryLocal from "./FormationRepositoryLocal";
-import TeamRepositoryInterface from "./TeamRepositoryInterface";
-import TeamRepositoryLocal from "./TeamRepositoryLocal";
-import TeamRepositoryRemote from "./TeamRepositoryRemote";
 
 export default class FormationRepository {
 
@@ -23,4 +20,13 @@ export default class FormationRepository {
         return FormationRepository.instance;
     }
 
+    public saveFormation(formation: Formation) {
+        const repo: FormationRepositoryInterface = this.repositories.get(true)!;
+        repo.saveFormation(formation);
+    }
+
+    public getFormations() : Formation[] {
+        const repo: FormationRepositoryInterface = this.repositories.get(true)!;
+        return repo.getAllFormations();
+    }
 }
